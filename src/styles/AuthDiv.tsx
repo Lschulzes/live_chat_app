@@ -8,7 +8,8 @@ export default styled.div`
   aside {
     flex: 7;
 
-    background-color: ${(props) => props.theme.secondary.bg};
+    background-image: ${(props) =>
+      `linear-gradient(-90deg, ${props.theme.secondary.bg_light},${props.theme.secondary.bg})`};
     color: ${(props) => props.theme.secondary.color};
     display: flex;
     flex-direction: column;
@@ -48,8 +49,20 @@ export default styled.div`
       align-items: stretch;
       text-align: center;
 
+      .logout_btn {
+        top: 0.5rem;
+        left: 1rem;
+        position: absolute;
+      }
+
       > img {
         align-self: center;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin: 4rem 0 1.5rem;
+        font-family: 'Poppins', sans-serif;
       }
 
       form {
@@ -116,6 +129,16 @@ export default styled.div`
           height: 1px;
           background-color: #a8a8b3;
           margin-left: 1rem;
+        }
+      }
+
+      p {
+        font-size: 0.85rem;
+        color: ${(props) => props.theme.primary.color};
+        margin-top: 1rem;
+
+        a {
+          color: ${() => '#e559f9'};
         }
       }
     }

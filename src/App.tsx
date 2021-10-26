@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
 import Home from './pages/Home';
 import { ThemeProvider } from 'styled-components';
-
+import { Switch, BrowserRouter, Route } from 'react-router-dom';
 import './services/firebase';
 import { Global } from './styles/Global';
 import { darkTheme, lightTheme } from './styles/themes/Themes';
 import usePersistState from './hooks/usePersistState';
+import { AuthContextProvider } from './contexts/authContext';
 
 export default function App() {
   const [theme, setTheme] = usePersistState('theme', lightTheme);
@@ -14,8 +14,16 @@ export default function App() {
   };
   return (
     <ThemeProvider theme={theme}>
-      <Global />
-      <Home toggleTheme={toggleTheme} />
+      <BrowserRouter>
+        <AuthContextProvider>
+          <Global />
+          <Switch>
+            <Route path='/'>
+              <Home toggleTheme={toggleTheme} />
+            </Route>
+          </Switch>
+        </AuthContextProvider>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }
