@@ -4,10 +4,12 @@ declare module 'styled-components' {
     title: string;
     primary: {
       bg: string;
+      bg_light: string;
       color: string;
     };
     secondary: {
       bg: string;
+      bg_light: string;
       color: string;
       color_p: string;
     };
