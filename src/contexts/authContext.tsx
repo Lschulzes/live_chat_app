@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import { useHistory } from 'react-router';
 import usePersistState from '../hooks/usePersistState';
+import { DefaultTheme } from 'styled-components';
+import useCustomTheme from '../hooks/useCustomTheme';
 
 type User = {
   uid: string;
@@ -20,12 +22,15 @@ type AuthContextType = {
   handleLoginUser: () => Promise<boolean | undefined>;
   handleLogoutUser: () => void;
   user: User;
+  theme: DefaultTheme;
+  toggleTheme: () => void;
 };
 
 const AuthContext = createContext({} as AuthContextType);
 
 export const AuthContextProvider = (props: PropsWithChildren<any>) => {
   const history = useHistory();
+  const [theme, toggleTheme] = useCustomTheme();
   const [user, setUser] = usePersistState('user', {} as User);
   const [isLoggedIn, setIsLoggedIn] = usePersistState('isLoggedIn', false);
   const handleLoginUser = async () => {
@@ -37,7 +42,11 @@ export const AuthContextProvider = (props: PropsWithChildren<any>) => {
 
     if (!username?.length) return false;
     setIsLoggedIn(true);
-    setUser({ username, avatar: avatar ?? '', uid });
+    setUser({
+      username,
+      avatar: avatar ?? 'https://source.unsplash.com/user',
+      uid,
+    });
     return true;
   };
 
@@ -55,6 +64,8 @@ export const AuthContextProvider = (props: PropsWithChildren<any>) => {
     handleLoginUser,
     handleLogoutUser,
     user,
+    theme,
+    toggleTheme,
   };
   return (
     <AuthContext.Provider value={contextValue}>

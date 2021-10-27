@@ -11,11 +11,9 @@ import { Link } from 'react-router-dom';
 import Logout from '../components/logout/Logout';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
-interface Props {
-  toggleTheme: () => void;
-}
+import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 
-const Home: React.FC<Props> = (props) => {
+const Home: React.FC = () => {
   const roomNameRef = useRef<HTMLInputElement>(null);
   const roomCodeRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
@@ -62,23 +60,14 @@ const Home: React.FC<Props> = (props) => {
       </aside>
       <main>
         <div className='main-content'>
-          <div style={{ top: '0.5rem', right: '0.5rem', position: 'absolute' }}>
-            <ReactSwitch
-              checked={themeCtx.title === 'dark'}
-              onChange={props.toggleTheme}
-              checkedIcon={false}
-              uncheckedIcon={false}
-              height={10}
-              width={30}
-              handleDiameter={17}
-              offColor={themeCtx.primary.color}
-              onColor={themeCtx.secondary.bg}
-              onHandleColor='#eee'
-              offHandleColor='#eee'
-              boxShadow='-2px 0 5px #000'
-            />
-          </div>
-          {authCtx.isLoggedIn && <Logout avatar={authCtx.user.avatar} />}
+          {authCtx.isLoggedIn && <Logout user={authCtx.user} />}
+          {!authCtx.isLoggedIn && (
+            <div
+              style={{ top: '0.5rem', left: '0.25rem', position: 'absolute' }}
+            >
+              <ToggleTheme />
+            </div>
+          )}
           <img src={logoImg} alt='Logo' />
           <Route path='/new-room'>
             <h2>Create a new room </h2>
