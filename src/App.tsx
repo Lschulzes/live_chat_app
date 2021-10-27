@@ -6,6 +6,7 @@ import { Global } from './styles/Global';
 import { darkTheme, lightTheme } from './styles/themes/Themes';
 import usePersistState from './hooks/usePersistState';
 import { AuthContextProvider } from './contexts/authContext';
+import Room from './pages/Room';
 
 export default function App() {
   const [theme, setTheme] = usePersistState('theme', lightTheme);
@@ -18,6 +19,9 @@ export default function App() {
         <AuthContextProvider>
           <Global />
           <Switch>
+            <Route path='/room/:id'>
+              <Room />
+            </Route>
             <Route path='/'>
               <Home toggleTheme={toggleTheme} />
             </Route>
