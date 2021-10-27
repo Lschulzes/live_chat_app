@@ -1,27 +1,51 @@
 import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 import googleIconImg from '../assets/images/google-icon.svg';
-import React, { useContext, useEffect } from 'react';
+import React, { FormEvent, useContext, useRef } from 'react';
 import AuthDiv from '../styles/AuthDiv';
 import { ThemeContext } from 'styled-components';
 import ReactSwitch from 'react-switch';
 import Button from '../components/UI/Button';
 import { Route, useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
-import AuthContext from '../contexts/authContext';
 import Logout from '../components/logout/Logout';
+import useAuth from '../hooks/useAuth';
+import { db } from '../services/firebase';
 interface Props {
   toggleTheme: () => void;
 }
 
 const Home: React.FC<Props> = (props) => {
+  const roomNameRef = useRef<HTMLInputElement>(null);
+  const roomCodeRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
   const themeCtx = useContext(ThemeContext);
-  const authCtx = useContext(AuthContext);
-  const handleCreateRoom = async () => {
+  const authCtx = useAuth();
+  const handleCreateRoom = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const roomName = roomNameRef.current!.value;
+    if (!roomName.trim().length) return;
+
+    const dbRoomRef = await db.ref('/room').push({
+      title: roomName,
+      authorId: authCtx.user.uid,
+    });
+
+    history.push(`/room/${dbRoomRef.key}`);
+  };
+  const handleNewRoom = async () => {
     const logged = await authCtx.handleLoginUser();
     if (!logged) return;
     history.push('/new-room');
+  };
+
+  const handleJoinRoom = async (e: FormEvent) => {
+    e.preventDefault();
+    const roomCode = roomCodeRef.current?.value;
+    if (!roomCode?.trim().length) return;
+    const dbRoom = await db.ref(`/room/${roomCode}`).get();
+    if (!dbRoom.exists()) return;
+    history.push(`/room/${roomCode}`);
   };
 
   return (
@@ -58,8 +82,8 @@ const Home: React.FC<Props> = (props) => {
           <img src={logoImg} alt='Logo' />
           <Route path='/new-room'>
             <h2>Create a new room </h2>
-            <form>
-              <input type='text' placeholder='Room Name' />
+            <form onSubmit={handleCreateRoom}>
+              <input type='text' placeholder='Room Name' ref={roomNameRef} />
               <Button type='submit'>Create Room</Button>
             </form>
             <p>
@@ -67,13 +91,17 @@ const Home: React.FC<Props> = (props) => {
             </p>
           </Route>
           <Route path='/' exact>
-            <button className='create-room' onClick={handleCreateRoom}>
+            <button className='create-room' onClick={handleNewRoom}>
               <img src={googleIconImg} alt='Logo do Google' />
               Create Your Room With Google
             </button>
             <div className='separator'>or join a room</div>
-            <form>
-              <input type='text' placeholder='Type the room code' />
+            <form onSubmit={handleJoinRoom}>
+              <input
+                type='text'
+                placeholder='Type the room code'
+                ref={roomCodeRef}
+              />
               <Button type='submit'>Join Room</Button>
             </form>
           </Route>

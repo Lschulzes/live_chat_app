@@ -4,6 +4,8 @@ type ThemeStructure = {
     bg: string;
     bg_light: string;
     color: string;
+    item_color: string;
+    item_color_darker: string;
   };
   secondary: {
     bg: string;
@@ -19,6 +21,8 @@ export const lightTheme: ThemeStructure = {
     bg: '#f8f8f8',
     bg_light: '#fff',
     color: '#29292e',
+    item_color: '#00a2e2',
+    item_color_darker: '#0690c7',
   },
   secondary: {
     bg: '#0075b4',
@@ -34,6 +38,8 @@ export const darkTheme: ThemeStructure = {
     bg: '#333',
     bg_light: '#444',
     color: '#f8f8f8',
+    item_color: '#4e4e4e',
+    item_color_darker: '#3e3e3e',
   },
   secondary: {
     bg: '#222',

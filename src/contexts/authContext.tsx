@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { useHistory } from 'react-router';
+import usePersistState from '../hooks/usePersistState';
 
 type User = {
   uid: string;
@@ -25,8 +26,8 @@ const AuthContext = createContext({} as AuthContextType);
 
 export const AuthContextProvider = (props: PropsWithChildren<any>) => {
   const history = useHistory();
-  const [user, setUser] = useState({} as User);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = usePersistState('user', {} as User);
+  const [isLoggedIn, setIsLoggedIn] = usePersistState('isLoggedIn', false);
   const handleLoginUser = async () => {
     if (isLoggedIn) return true;
     const provider = new firebase.auth.GoogleAuthProvider();

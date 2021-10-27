@@ -1,7 +1,6 @@
-import React, { useContext } from 'react';
 import logoutImg from '../../assets/images/logout.svg';
 import styled from 'styled-components';
-import AuthContext from '../../contexts/authContext';
+import useAuth from '../../hooks/useAuth';
 const LogoutImg = styled.img`
   width: 2rem;
   /* background: ${(props) => props.theme.primary.color}; */
@@ -17,6 +16,7 @@ const UserActions = styled.div`
     border-radius: 45px;
     z-index: 10;
     transition: all 0.4s;
+    /* border: 3px solid #c8c8c8; */
   }
 
   .logout {
@@ -39,10 +39,15 @@ const UserActions = styled.div`
 type LogoutProps = { avatar: string };
 
 export default function Logout(props: LogoutProps) {
-  const { handleLogoutUser } = useContext(AuthContext);
+  const { handleLogoutUser } = useAuth();
   return (
     <UserActions className='logout_btn'>
-      <img src={props.avatar} alt={'User Avatar'} className='pic' />
+      <img
+        src={props.avatar}
+        alt={'User Avatar'}
+        className='pic'
+        referrerPolicy='no-referrer'
+      />
       <LogoutImg
         src={logoutImg}
         alt='logout'
