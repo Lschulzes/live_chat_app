@@ -10,6 +10,7 @@ export const Global = createGlobalStyle`
   body {
     background-color: ${(props) => props.theme.primary.bg};
     color: ${(props) => props.theme.primary.color};
+    transition: background .25s;
   }
 
   body,

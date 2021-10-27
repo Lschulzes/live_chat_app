@@ -7,6 +7,7 @@ import AuthContext, { AuthContextProvider } from './contexts/authContext';
 import Room from './pages/Room';
 import useCustomTheme from './hooks/useCustomTheme';
 import { useContext, useEffect } from 'react';
+import AdminRoom from './pages/AdminRoom';
 
 export default function App() {
   const { theme } = useContext(AuthContext);
@@ -17,6 +18,9 @@ export default function App() {
       <Switch>
         <Route path='/room/:id'>
           <Room />
+        </Route>
+        <Route path='/admin/room/:id'>
+          <AdminRoom />
         </Route>
         <Route path='/'>
           <Home />
