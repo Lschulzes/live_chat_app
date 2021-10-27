@@ -17,6 +17,16 @@ export const RoomPageDiv = styled.div`
       > img {
         max-height: 3rem;
       }
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        button {
+          max-height: 2.5rem;
+        }
+      }
     }
   }
 
@@ -44,6 +54,10 @@ export const RoomPageDiv = styled.div`
         font-weight: 500;
         font-size: 0.85rem;
       }
+
+      .username {
+        color: #fff !important;
+      }
     }
     form {
       textarea {
@@ -63,6 +77,7 @@ export const RoomPageDiv = styled.div`
         justify-content: space-between;
         align-items: center;
         margin-top: 1rem;
+        padding-left: 0.75rem;
 
         span {
           font-size: 0.85rem;
@@ -81,6 +96,10 @@ export const RoomPageDiv = styled.div`
           }
         }
       }
+    }
+
+    .question-list {
+      margin-top: 1.5rem;
     }
 
     ${({ theme }) =>

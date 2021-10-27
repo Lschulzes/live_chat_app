@@ -1,4 +1,4 @@
-import React, { FormEvent, useContext, useRef, useState } from 'react';
+import { FormEvent, useRef } from 'react';
 import logoImg from '../assets/images/logo.svg';
 import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
@@ -7,27 +7,28 @@ import { RoomPageDiv } from '../styles/RoomPageDiv';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import Logout from '../components/logout/Logout';
-import ToggleTheme from '../components/toggleTheme/ToggleTheme';
-import { ThemeContext } from 'styled-components';
+import Question from '../components/question/Question';
+import useRoom from '../hooks/useRoom';
 
 type RoomCodeType = {
   id: string;
 };
+
 export default function Room() {
   const { id: roomCode } = useParams<RoomCodeType>();
   const { user, handleLoginUser } = useAuth();
-  const [newQuestion, setNewQuestion] = useState('');
-  const themeCtx = useContext(ThemeContext);
   const questionTextRef = useRef<HTMLTextAreaElement>(null);
+  const [questions, title] = useRoom(roomCode);
+
   const handleCreateQuestion = async (e: FormEvent) => {
     e.preventDefault();
 
     const questionText = questionTextRef.current?.value;
+    console.log(questionText);
     if (!questionText?.trim().length) return;
     if (!user) throw new Error('Needs to be logged in to send questions');
-    setNewQuestion(questionText);
     const question = {
-      content: newQuestion,
+      content: questionText,
       author: {
         name: user.username,
         avatar: user.avatar,
@@ -39,6 +40,7 @@ export default function Room() {
     await db.ref(`room/${roomCode}/questions`).push(question);
     questionTextRef.current!.value = '';
   };
+
   return (
     <RoomPageDiv>
       <header>
@@ -49,8 +51,10 @@ export default function Room() {
       </header>
       <main className='content'>
         <div className='room-title'>
-          <h1>Room Name</h1>
-          <span>4 Questions</span>
+          <h1>Room {title}</h1>
+          <span>
+            {questions.length} Question{questions.length === 1 ? '' : 's'}
+          </span>
         </div>
         <form onSubmit={handleCreateQuestion}>
           <textarea
@@ -71,6 +75,15 @@ export default function Room() {
             </Button>
           </div>
         </form>
+        <ul className='question-list'>
+          {questions.map((question) => (
+            <Question
+              key={question.questionId}
+              author={question.author}
+              content={question.content}
+            />
+          ))}
+        </ul>
       </main>
     </RoomPageDiv>
   );

@@ -2,15 +2,21 @@ import React, { ButtonHTMLAttributes } from 'react';
 import styled from 'styled-components';
 const ButtonButton = styled.button`
   border-radius: 8px;
-
   background-image: ${(props) =>
     `linear-gradient(180deg, ${props.theme.primary.item_color},${props.theme.primary.item_color_darker})`};
   cursor: pointer;
-  color: #fff;
+  color: ${({ theme }) =>
+    theme.title === 'light' ? theme.primary.item_color : '#fff'};
   border: none;
   height: 3rem;
   transition: filter 300ms;
   padding: 0 1rem;
+
+  ${({ className, theme }) =>
+    className === 'outlined' &&
+    `
+    background: transparent;
+    border: solid 1px ${theme.primary.item_color};`}
 
   &:hover {
     filter: brightness(0.9);
@@ -22,6 +28,10 @@ const ButtonButton = styled.button`
   }
 `;
 
-export default function Button(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <ButtonButton {...props} />;
+type ButtonUIType = ButtonHTMLAttributes<HTMLButtonElement> & {
+  isOutlined?: boolean;
+};
+
+export default function Button({ isOutlined, ...props }: ButtonUIType) {
+  return <ButtonButton {...props} className={isOutlined ? `outlined` : ''} />;
 }
