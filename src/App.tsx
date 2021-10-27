@@ -3,31 +3,25 @@ import { ThemeProvider } from 'styled-components';
 import { Switch, BrowserRouter, Route } from 'react-router-dom';
 import './services/firebase';
 import { Global } from './styles/Global';
-import { darkTheme, lightTheme } from './styles/themes/Themes';
-import usePersistState from './hooks/usePersistState';
-import { AuthContextProvider } from './contexts/authContext';
+import AuthContext, { AuthContextProvider } from './contexts/authContext';
 import Room from './pages/Room';
+import useCustomTheme from './hooks/useCustomTheme';
+import { useContext, useEffect } from 'react';
 
 export default function App() {
-  const [theme, setTheme] = usePersistState('theme', lightTheme);
-  const toggleTheme = () => {
-    setTheme(theme.title === 'light' ? darkTheme : lightTheme);
-  };
+  const { theme } = useContext(AuthContext);
+
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <AuthContextProvider>
-          <Global />
-          <Switch>
-            <Route path='/room/:id'>
-              <Room />
-            </Route>
-            <Route path='/'>
-              <Home toggleTheme={toggleTheme} />
-            </Route>
-          </Switch>
-        </AuthContextProvider>
-      </BrowserRouter>
+      <Global />
+      <Switch>
+        <Route path='/room/:id'>
+          <Room />
+        </Route>
+        <Route path='/'>
+          <Home />
+        </Route>
+      </Switch>
     </ThemeProvider>
   );
 }

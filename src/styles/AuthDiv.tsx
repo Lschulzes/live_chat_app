@@ -142,5 +142,11 @@ export default styled.div`
         }
       }
     }
+
+    ${({ theme }) =>
+      theme.title === 'light' &&
+      `.logout {
+        filter: invert(100%) sepia(3%) saturate(1936%) hue-rotate(170deg) brightness(118%) contrast(87%);
+    }`}
   }
 `;
