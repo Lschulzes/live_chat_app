@@ -1,27 +1,25 @@
-import { useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ReactSwitch from 'react-switch';
 import styled from 'styled-components';
-import AuthContext from '../../contexts/authContext';
-import useCustomTheme from '../../hooks/useCustomTheme';
+import { RootState } from '../../store';
+import { toggleTheme } from '../../store/slices/theme';
 
 const ToggleDiv = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
 `;
-type ToggleThemeType = {
-  toggleTheme: () => void;
-};
 
 export default function ToggleTheme() {
-  const { theme, toggleTheme } = useContext(AuthContext);
+  const { theme } = useSelector((state: RootState) => state.theme);
+  const dispatch = useDispatch();
 
   return (
     <ToggleDiv className='toggle-theme'>
       🌞
       <ReactSwitch
         checked={theme.title === 'dark'}
-        onChange={toggleTheme}
+        onChange={() => dispatch(toggleTheme())}
         checkedIcon={false}
         uncheckedIcon={false}
         height={10}

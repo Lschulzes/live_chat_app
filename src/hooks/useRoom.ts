@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import { db } from '../services/firebase';
-import useAuth from './useAuth';
+import { RootState } from '../store';
 
 type QuestionType = {
   author: {
@@ -25,7 +27,8 @@ type RoomData = {
 const useRoom = (roomCode: string): [QuestionType[], string] => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [title, setTitle] = useState<string>('');
-  const { user } = useAuth();
+  const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
+  const history = useHistory();
   useEffect(() => {
     const roomRef = db.ref(`room/${roomCode}`);
 
@@ -43,11 +46,18 @@ const useRoom = (roomCode: string): [QuestionType[], string] => {
             isAnswered: val.isAnswered,
             likeCount: Object.values(val.likes ?? {}).length,
             likeId: Object.entries(val.likes ?? {}).find(
-              ([key, val]) => val.authorId === user?.uid
+              ([_, val]) => val.authorId === user?.uid
             )?.[0],
           };
         });
       }
+
+      questionsArray.sort((a: QuestionType, b: QuestionType) => {
+        const areEqual = a.likeCount === b.likeCount;
+        const isBBigger = b.likeCount - a.likeCount > 0 ? 1 : -1;
+        return (areEqual && -1) || isBBigger;
+      });
+
       setQuestions(questionsArray as QuestionType[]);
 
       setTitle(title);

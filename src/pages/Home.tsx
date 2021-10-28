@@ -12,6 +12,9 @@ import Logout from '../components/logout/Logout';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../store';
+import { handleLoginUser } from '../store/slices/auth/actions';
 
 type RoomType = {
   authorId: string;
@@ -23,7 +26,8 @@ const Home: React.FC = () => {
   const roomNameRef = useRef<HTMLInputElement>(null);
   const roomCodeRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
-  const authCtx = useAuth();
+  const authState = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
   const handleCreateRoom = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const roomName = roomNameRef.current!.value;
@@ -31,13 +35,13 @@ const Home: React.FC = () => {
 
     const dbRoomRef = await db.ref('/room').push({
       title: roomName,
-      authorId: authCtx.user.uid,
+      authorId: authState.user.uid,
     });
 
     history.push(`/admin/room/${dbRoomRef.key}`);
   };
   const handleNewRoom = async () => {
-    const logged = await authCtx.handleLoginUser();
+    const logged = await dispatch(handleLoginUser(authState));
     if (!logged) return;
     history.push('/new-room');
   };
@@ -50,7 +54,7 @@ const Home: React.FC = () => {
     if (!dbRoom.exists()) return;
     const room: RoomType = await dbRoom.val();
     if (room?.endedAt) return;
-    if (room.authorId === authCtx.user.uid) {
+    if (room.authorId === authState.user.uid) {
       history.push(`/admin/room/${roomCode}`);
       return;
     }
@@ -71,8 +75,8 @@ const Home: React.FC = () => {
       </aside>
       <main>
         <div className='main-content'>
-          {authCtx.isLoggedIn && <Logout user={authCtx.user} />}
-          {!authCtx.isLoggedIn && (
+          {authState.isLoggedIn && <Logout user={authState.user} />}
+          {!authState.isLoggedIn && (
             <div
               style={{ top: '0.5rem', left: '0.25rem', position: 'absolute' }}
             >

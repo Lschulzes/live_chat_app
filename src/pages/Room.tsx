@@ -4,11 +4,13 @@ import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
 import { useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
-import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import Logout from '../components/logout/Logout';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
+import { handleLoginUser } from '../store/slices/auth/actions';
 
 type RoomCodeType = {
   id: string;
@@ -16,15 +18,16 @@ type RoomCodeType = {
 
 export default function Room() {
   const { id: roomCode } = useParams<RoomCodeType>();
-  const { user, handleLoginUser } = useAuth();
+  const authState = useSelector((state: RootState) => state.auth);
+  const { user, isLoggedIn } = authState;
+  const dispatch = useDispatch();
   const questionTextRef = useRef<HTMLTextAreaElement>(null);
   const [questions, title] = useRoom(roomCode);
-
   const handleCreateQuestion = async (e: FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) return;
 
     const questionText = questionTextRef.current?.value;
-    console.log(questionText);
     if (!questionText?.trim().length) return;
     if (!user) throw new Error('Needs to be logged in to send questions');
     const question = {
@@ -42,6 +45,7 @@ export default function Room() {
   };
 
   const handleLikeQuestion = async (questionId: string, likeId: string) => {
+    if (!isLoggedIn) return;
     if (likeId) {
       db.ref(
         `room/${roomCode}/questions/${questionId}/likes/${likeId}`
@@ -74,15 +78,18 @@ export default function Room() {
             ref={questionTextRef}
           />
           <div className='form-footer'>
-            {user?.username ? (
+            {isLoggedIn ? (
               <Logout user={user} />
             ) : (
               <span>
-                <button onClick={handleLoginUser}>Login</button> to send a
-                question
+                <button onClick={() => dispatch(handleLoginUser(authState))}>
+                  Login
+                </button>{' '}
+                to send a question
               </span>
             )}
-            <Button type='submit' disabled={!user}>
+            {/* <Button type='submit' disabled={!isLoggedIn}> */}
+            <Button type='submit' disabled={true}>
               Send Question
             </Button>
           </div>
