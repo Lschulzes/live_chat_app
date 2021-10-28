@@ -5,6 +5,9 @@ type ThemeItems = {
   color: string;
   item_color: string;
   item_color_darker: string;
+  highlight: string;
+  bg_darker: string;
+  color_weak: string;
 };
 declare module 'styled-components' {
   export interface DefaultTheme {

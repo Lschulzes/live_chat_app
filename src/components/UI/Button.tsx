@@ -5,8 +5,12 @@ const ButtonButton = styled.button`
   background-image: ${(props) =>
     `linear-gradient(180deg, ${props.theme.primary.item_color},${props.theme.primary.item_color_darker})`};
   cursor: pointer;
-  color: ${({ theme }) =>
-    theme.title === 'light' ? theme.primary.item_color : '#fff'};
+  color: ${({ theme, className }) =>
+    theme.title === 'light'
+      ? className === 'outlined'
+        ? theme.primary.item_color
+        : theme.primary.bg
+      : '#fff'};
   border: none;
   height: 3rem;
   transition: filter 300ms;
