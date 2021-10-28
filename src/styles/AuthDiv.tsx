@@ -138,7 +138,7 @@ export default styled.div`
         margin-top: 1rem;
 
         a {
-          color: ${() => '#e559f9'};
+          color: ${(props) => props.theme.primary.highlight};
         }
       }
     }

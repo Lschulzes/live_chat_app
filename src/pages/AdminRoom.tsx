@@ -1,4 +1,4 @@
-import { FormEvent, useRef } from 'react';
+import { FormEvent, useEffect, useRef } from 'react';
 import logoImg from '../assets/images/logo.svg';
 import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
@@ -7,11 +7,12 @@ import checkImg from '../assets/images/check.svg';
 import answerImg from '../assets/images/answer.svg';
 import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
-import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import Logout from '../components/logout/Logout';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 type RoomCodeType = {
   id: string;
@@ -19,8 +20,7 @@ type RoomCodeType = {
 
 export default function AdminRoom() {
   const { id: roomCode } = useParams<RoomCodeType>();
-  const { user, handleLoginUser } = useAuth();
-  const questionTextRef = useRef<HTMLTextAreaElement>(null);
+  const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
 
@@ -48,6 +48,10 @@ export default function AdminRoom() {
       history.push('/');
     }
   };
+
+  useEffect(() => {
+    !isLoggedIn && history.push('/');
+  }, [isLoggedIn]);
 
   return (
     <RoomPageDiv>

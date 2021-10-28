@@ -1,8 +1,10 @@
 import logoutImg from '../../assets/images/logout.svg';
 import styled from 'styled-components';
-import useAuth from '../../hooks/useAuth';
 import ToggleTheme from '../toggleTheme/ToggleTheme';
 import { UserActions } from './UserActionsDiv';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../store/index';
+import { handleLogout } from '../../store/slices/auth';
 
 const LogoutImg = styled.img`
   width: 2rem;
@@ -20,8 +22,9 @@ type LogoutProps = {
   };
 };
 
-export default function Logout({ user }: LogoutProps) {
-  const { handleLogoutUser } = useAuth();
+export default function Logout(_: LogoutProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
   return (
     <UserActions className='logout_btn'>
       <img
@@ -33,7 +36,7 @@ export default function Logout({ user }: LogoutProps) {
       <LogoutImg
         src={logoutImg}
         alt='logout'
-        onClick={handleLogoutUser}
+        onClick={() => dispatch(handleLogout())}
         className='logout'
       />
       <ToggleTheme />
