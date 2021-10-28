@@ -56,7 +56,8 @@ export const RoomPageDiv = styled.div`
       }
 
       .username {
-        color: #fff !important;
+        color: ${({ theme }) =>
+          theme.title === 'light' ? theme.primary.bg : '#fff'} !important;
       }
     }
     form {

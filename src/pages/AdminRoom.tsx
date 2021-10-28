@@ -2,7 +2,10 @@ import { FormEvent, useRef } from 'react';
 import logoImg from '../assets/images/logo.svg';
 import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
-import { useParams } from 'react-router';
+import deleteImg from '../assets/images/delete.svg';
+import checkImg from '../assets/images/check.svg';
+import answerImg from '../assets/images/answer.svg';
+import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
@@ -19,26 +22,31 @@ export default function AdminRoom() {
   const { user, handleLoginUser } = useAuth();
   const questionTextRef = useRef<HTMLTextAreaElement>(null);
   const [questions, title] = useRoom(roomCode);
+  const history = useHistory();
 
-  const handleCreateQuestion = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleDeleteQuestion = async (questionId: string) => {
+    if (window.confirm('Delete question?')) {
+      await db.ref(`room/${roomCode}/questions/${questionId}`).remove();
+    }
+  };
+  const handleCheckQuestionAsAnswered = async (questionId: string) => {
+    await db.ref(`room/${roomCode}/questions/${questionId}`).update({
+      isAnswered: true,
+    });
+  };
+  const handleHighlightQuestion = async (questionId: string) => {
+    await db.ref(`room/${roomCode}/questions/${questionId}`).update({
+      isHighlighted: true,
+    });
+  };
 
-    const questionText = questionTextRef.current?.value;
-    console.log(questionText);
-    if (!questionText?.trim().length) return;
-    if (!user) throw new Error('Needs to be logged in to send questions');
-    const question = {
-      content: questionText,
-      author: {
-        name: user.username,
-        avatar: user.avatar,
-      },
-      isHighlighted: false,
-      isAnswered: false,
-    };
-
-    await db.ref(`room/${roomCode}/questions`).push(question);
-    questionTextRef.current!.value = '';
+  const handleEndRoom = async () => {
+    if (window.confirm('Delete room?')) {
+      const questionRef = await db.ref(`room/${roomCode}`).update({
+        endedAt: new Date(),
+      });
+      history.push('/');
+    }
   };
 
   return (
@@ -48,7 +56,9 @@ export default function AdminRoom() {
           <img src={logoImg} alt='Live Chat Logo' />
           <div>
             <RoomCode code={roomCode} />
-            <Button isOutlined>Close Room</Button>
+            <Button isOutlined onClick={handleEndRoom}>
+              Close Room
+            </Button>
           </div>
         </div>
       </header>
@@ -74,7 +84,30 @@ export default function AdminRoom() {
               key={question.questionId}
               author={question.author}
               content={question.content}
-            />
+              isAnswered={question.isAnswered}
+              isHighlighted={question.isHighlighted}
+            >
+              <button
+                type='button'
+                onClick={() =>
+                  handleCheckQuestionAsAnswered(question.questionId)
+                }
+              >
+                <img src={checkImg} alt='Check question as answered' />
+              </button>
+              <button
+                type='button'
+                onClick={() => handleHighlightQuestion(question.questionId)}
+              >
+                <img src={answerImg} alt='Highlights question' />
+              </button>
+              <button
+                type='button'
+                onClick={() => handleDeleteQuestion(question.questionId)}
+              >
+                <img src={deleteImg} alt='delete question' />
+              </button>
+            </Question>
           ))}
         </ul>
       </main>

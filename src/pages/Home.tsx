@@ -13,11 +13,16 @@ import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 
+type RoomType = {
+  authorId: string;
+  endedAt: string;
+  title: string;
+};
+
 const Home: React.FC = () => {
   const roomNameRef = useRef<HTMLInputElement>(null);
   const roomCodeRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
-  const themeCtx = useContext(ThemeContext);
   const authCtx = useAuth();
   const handleCreateRoom = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,7 +34,7 @@ const Home: React.FC = () => {
       authorId: authCtx.user.uid,
     });
 
-    history.push(`/room/${dbRoomRef.key}`);
+    history.push(`/admin/room/${dbRoomRef.key}`);
   };
   const handleNewRoom = async () => {
     const logged = await authCtx.handleLoginUser();
@@ -43,6 +48,12 @@ const Home: React.FC = () => {
     if (!roomCode?.trim().length) return;
     const dbRoom = await db.ref(`/room/${roomCode}`).get();
     if (!dbRoom.exists()) return;
+    const room: RoomType = await dbRoom.val();
+    if (room?.endedAt) return;
+    if (room.authorId === authCtx.user.uid) {
+      history.push(`/admin/room/${roomCode}`);
+      return;
+    }
     history.push(`/room/${roomCode}`);
   };
 
