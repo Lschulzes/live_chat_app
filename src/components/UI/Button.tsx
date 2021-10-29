@@ -26,7 +26,7 @@ const ButtonButton = styled.button`
     filter: brightness(0.9);
   }
 
-  &::disabled {
+  &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }

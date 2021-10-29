@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import themeReducer from './slices/theme/index';
 import authReducer from './slices/auth/index';
-import thunk from 'redux-thunk';
+import UIReducer from './slices/UI/UISlice';
 export const store = configureStore({
   reducer: {
     theme: themeReducer,
     auth: authReducer,
+    UI: UIReducer,
   },
 });
 

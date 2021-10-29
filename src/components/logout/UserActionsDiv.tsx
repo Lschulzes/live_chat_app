@@ -6,9 +6,8 @@ export const UserActions = styled.div`
   .pic {
     width: 45px;
     border-radius: 45px;
-    z-index: 10;
     transition: all 0.4s;
-    /* border: 3px solid #c8c8c8; */
+    z-index: 2;
   }
 
   .toggle-theme {

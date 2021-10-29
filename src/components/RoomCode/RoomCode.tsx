@@ -1,6 +1,8 @@
 import copyImg from '../../assets/images/copy.svg';
 import styled from 'styled-components';
 import { useParams } from 'react-router';
+import { useDispatch } from 'react-redux';
+import { UIActions } from '../../store/slices/UI/UISlice';
 const RoomCodeButton = styled.button`
   height: 2.5rem;
   border-radius: 8px;
@@ -39,8 +41,10 @@ type RoomCodeType = {
 };
 
 export default function RoomCode({ code: roomCode }: RoomCodeType) {
+  const dispatch = useDispatch();
   const copyRoomCodeToClipboard = () => {
     navigator.clipboard.writeText(roomCode);
+    dispatch(UIActions.setSuccess({ msg: 'Copied to Clipboard!' }));
   };
 
   return (

@@ -16,6 +16,7 @@ export const RoomPageDiv = styled.div`
 
       > img {
         max-height: 3rem;
+        cursor: pointer;
       }
 
       > div {

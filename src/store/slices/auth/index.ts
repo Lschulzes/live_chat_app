@@ -1,5 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { handleLoginUser, handleLogoutUser, handleUpdateUser } from './actions';
+import {
+  handleLoginUser,
+  handleLogoutUser,
+  handleUpdateUser,
+  loadUserAction,
+} from './actions';
 
 export type User = {
   uid: string;
@@ -13,7 +18,7 @@ export type AuthStateType = {
 };
 
 const initialState: AuthStateType = {
-  isLoggedIn: false,
+  isLoggedIn: true,
   user: {
     uid: '',
     username: '',
@@ -27,9 +32,10 @@ const authSlice = createSlice({
   reducers: {
     handleLogout: handleLogoutUser,
     handleUpdate: handleUpdateUser,
+    loadUser: loadUserAction,
   },
 });
 
 export default authSlice.reducer;
 export const AuthActions = authSlice.actions;
-export const { handleLogout } = authSlice.actions;
+export const { handleLogout, loadUser } = authSlice.actions;
