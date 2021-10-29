@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import { db } from '../services/firebase';
 import { RootState } from '../store';
+import { UIActions } from '../store/slices/UI/UISlice';
 
 type QuestionType = {
   author: {
@@ -29,9 +30,10 @@ const useRoom = (roomCode: string): [QuestionType[], string] => {
   const [title, setTitle] = useState<string>('');
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const history = useHistory();
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const roomRef = db.ref(`room/${roomCode}`);
-
     roomRef.on('value', (room) => {
       const { questions, title } = room.val() as RoomData;
       let questionsArray: any[] = [];

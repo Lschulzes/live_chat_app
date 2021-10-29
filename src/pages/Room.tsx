@@ -2,7 +2,7 @@ import { FormEvent, useRef, useState } from 'react';
 import logoImg from '../assets/images/logo.svg';
 import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
-import { useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
 import { db } from '../services/firebase';
 import Logout from '../components/logout/Logout';
@@ -11,6 +11,8 @@ import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { handleLoginUser } from '../store/slices/auth/actions';
+import { Link } from 'react-router-dom';
+import { UIActions } from '../store/slices/UI/UISlice';
 
 type RoomCodeType = {
   id: string;
@@ -21,6 +23,7 @@ export default function Room() {
   const authState = useSelector((state: RootState) => state.auth);
   const { user, isLoggedIn } = authState;
   const dispatch = useDispatch();
+  const history = useHistory();
   const questionTextRef = useRef<HTMLTextAreaElement>(null);
   const [questions, title] = useRoom(roomCode);
   const handleCreateQuestion = async (e: FormEvent) => {
@@ -28,7 +31,9 @@ export default function Room() {
     if (!isLoggedIn) return;
 
     const questionText = questionTextRef.current?.value;
-    if (!questionText?.trim().length) return;
+    const questionLength = questionText?.trim().length;
+    if (!questionLength) return;
+    if (questionLength > 1000) return;
     if (!user) throw new Error('Needs to be logged in to send questions');
     const question = {
       content: questionText,
@@ -39,9 +44,12 @@ export default function Room() {
       isHighlighted: false,
       isAnswered: false,
     };
-
     await db.ref(`room/${roomCode}/questions`).push(question);
     questionTextRef.current!.value = '';
+    dispatch(UIActions.setSuccess({ msg: 'Question sent successfully!' }));
+    setTimeout(() => {
+      dispatch(UIActions.clearSuccess());
+    }, 3000);
   };
 
   const handleLikeQuestion = async (questionId: string, likeId: string) => {
@@ -57,17 +65,20 @@ export default function Room() {
     });
   };
 
+  const redirectToHome = () => history.push('/');
+
   return (
     <RoomPageDiv>
       <header>
         <div className='content'>
-          <img src={logoImg} alt='Live Chat Logo' />
+          <img src={logoImg} alt='Live Chat Logo' onClick={redirectToHome} />
+
           <RoomCode code={roomCode} />
         </div>
       </header>
       <main className='content'>
         <div className='room-title'>
-          <h1>Room {title}</h1>
+          <h1>{title}</h1>
           <span>
             {questions.length} Question{questions.length === 1 ? '' : 's'}
           </span>
@@ -76,6 +87,7 @@ export default function Room() {
           <textarea
             placeholder='What do you want to ask?'
             ref={questionTextRef}
+            maxLength={1000}
           />
           <div className='form-footer'>
             {isLoggedIn ? (
@@ -88,8 +100,7 @@ export default function Room() {
                 to send a question
               </span>
             )}
-            {/* <Button type='submit' disabled={!isLoggedIn}> */}
-            <Button type='submit' disabled={true}>
+            <Button type='submit' disabled={!isLoggedIn}>
               Send Question
             </Button>
           </div>

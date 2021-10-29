@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import logoImg from '../assets/images/logo.svg';
 import Button from '../components/UI/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
@@ -11,8 +11,10 @@ import { db } from '../services/firebase';
 import Logout from '../components/logout/Logout';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
+import { UIActions } from '../store/slices/UI/UISlice';
+import { UITypeActions } from '../store/helpers';
 
 type RoomCodeType = {
   id: string;
@@ -23,41 +25,101 @@ export default function AdminRoom() {
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
+  const trigger = useSelector((state: RootState) => state.UI.trigger);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    let controller = new AbortController();
+    (async () => {
+      if (!trigger.on) return;
+      if (trigger.type === UITypeActions.DELETE_QUESTION) {
+        db.ref(
+          `room/${roomCode}/questions/${trigger.data.questionId}`
+        ).remove();
+      }
+      if (trigger.type === UITypeActions.CLOSE_ROOM) {
+        await db.ref(`room/${roomCode}`).update({
+          endedAt: new Date(),
+        });
+        history.push('/');
+      }
+      dispatch(UIActions.cleanTrigger());
+    })();
+    return () => controller?.abort();
+  }, [trigger]);
 
   const handleDeleteQuestion = async (questionId: string) => {
-    if (window.confirm('Delete question?')) {
-      await db.ref(`room/${roomCode}/questions/${questionId}`).remove();
-    }
+    dispatch(UIActions.toggleModal());
+    dispatch(
+      UIActions.setModal({
+        heading: 'Are you sure to delete the question?',
+        title: `Room ${title}`,
+        action: 'Delete',
+        text: '',
+      })
+    );
+    dispatch(
+      UIActions.setTrigger({
+        data: { questionId },
+        type: UITypeActions.DELETE_QUESTION,
+        on: false,
+      })
+    );
   };
   const handleCheckQuestionAsAnswered = async (questionId: string) => {
+    const question: { isAnswered: boolean } = (
+      await db.ref(`room/${roomCode}/questions/${questionId}`).get()
+    ).val();
     await db.ref(`room/${roomCode}/questions/${questionId}`).update({
-      isAnswered: true,
+      isAnswered: !question.isAnswered,
     });
   };
   const handleHighlightQuestion = async (questionId: string) => {
+    const question: { isHighlighted: boolean } = (
+      await db.ref(`room/${roomCode}/questions/${questionId}`).get()
+    ).val();
+
     await db.ref(`room/${roomCode}/questions/${questionId}`).update({
-      isHighlighted: true,
+      isHighlighted: !question.isHighlighted,
     });
   };
 
   const handleEndRoom = async () => {
-    if (window.confirm('Delete room?')) {
-      const questionRef = await db.ref(`room/${roomCode}`).update({
-        endedAt: new Date(),
-      });
-      history.push('/');
-    }
+    dispatch(UIActions.toggleModal());
+    dispatch(
+      UIActions.setModal({
+        heading: 'Are you sure to terminate the room?',
+        title: `Room ${title}`,
+        action: 'Confirm',
+        text: "This can't be undone!",
+      })
+    );
+    dispatch(
+      UIActions.setTrigger({
+        data: {},
+        type: UITypeActions.CLOSE_ROOM,
+        on: false,
+      })
+    );
   };
 
   useEffect(() => {
-    !isLoggedIn && history.push('/');
-  }, [isLoggedIn]);
+    let controller = new AbortController();
+    (async () => {
+      if (!isLoggedIn) return history.push('/');
+      const room: any = await (await db.ref(`/room/${roomCode}`).get()).val();
+      if (room.authorId === user.uid || !user.uid) return;
+      history.push(`/`);
+    })();
 
+    return () => controller?.abort();
+  }, [isLoggedIn]);
+  const redirectToHome = () => history.push('/');
   return (
     <RoomPageDiv>
       <header>
         <div className='content'>
-          <img src={logoImg} alt='Live Chat Logo' />
+          <img src={logoImg} alt='Live Chat Logo' onClick={redirectToHome} />
           <div>
             <RoomCode code={roomCode} />
             <Button isOutlined onClick={handleEndRoom}>
@@ -72,7 +134,7 @@ export default function AdminRoom() {
           style={{ alignItems: 'flex-start', display: 'flex' }}
         >
           <div style={{ alignItems: 'flex-center', display: 'flex' }}>
-            <h1>Room {title}</h1>
+            <h1>{title}</h1>
             <span>
               {questions.length} Question{questions.length === 1 ? '' : 's'}
             </span>

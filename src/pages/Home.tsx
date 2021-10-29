@@ -15,6 +15,7 @@ import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { handleLoginUser } from '../store/slices/auth/actions';
+import { UIActions } from '../store/slices/UI/UISlice';
 
 type RoomType = {
   authorId: string;
@@ -26,10 +27,16 @@ const Home: React.FC = () => {
   const roomNameRef = useRef<HTMLInputElement>(null);
   const roomCodeRef = useRef<HTMLInputElement>(null);
   const history = useHistory();
-  const authState = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+  const authState = useSelector((state: RootState) => state.auth);
   const handleCreateRoom = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!authState.isLoggedIn) {
+      dispatch(UIActions.setError({ msg: 'Log In to create a room' }));
+      history.push('/');
+      handleNewRoom();
+      return;
+    }
     const roomName = roomNameRef.current!.value;
     if (!roomName.trim().length) return;
 
@@ -41,18 +48,29 @@ const Home: React.FC = () => {
     history.push(`/admin/room/${dbRoomRef.key}`);
   };
   const handleNewRoom = async () => {
-    const logged = await dispatch(handleLoginUser(authState));
-    if (!logged) return;
-    history.push('/new-room');
+    try {
+      const logged = await dispatch(handleLoginUser(authState));
+      if (!logged) return;
+      history.push('/new-room');
+    } catch (error) {
+      dispatch(UIActions.setError({ msg: 'Failed to Log In.' }));
+    }
   };
 
   const handleJoinRoom = async (e: FormEvent) => {
     e.preventDefault();
+    dispatch(UIActions.setIsLoading({ loading: true }));
     const roomCode = roomCodeRef.current?.value;
     if (!roomCode?.trim().length) return;
+
     const dbRoom = await db.ref(`/room/${roomCode}`).get();
-    if (!dbRoom.exists()) return;
+    dispatch(UIActions.setIsLoading({ loading: false }));
+    if (!dbRoom.exists()) {
+      dispatch(UIActions.setError({ msg: 'No room with such code exists!' }));
+      return;
+    }
     const room: RoomType = await dbRoom.val();
+
     if (room?.endedAt) return;
     if (room.authorId === authState.user.uid) {
       history.push(`/admin/room/${roomCode}`);
@@ -97,7 +115,7 @@ const Home: React.FC = () => {
           <Route path='/' exact>
             <button className='create-room' onClick={handleNewRoom}>
               <img src={googleIconImg} alt='Logo do Google' />
-              Create Your Room With Google
+              {'Create Your Room With Google'}
             </button>
             <div className='separator'>or join a room</div>
             <form onSubmit={handleJoinRoom}>
