@@ -30,9 +30,16 @@ const RoomCodeButton = styled.button`
     flex: 1;
     padding: 0 1rem 0 0.75rem;
     /* width: 10rem; */
-    width: 15rem;
+    width: 9rem;
     font-size: 0.8rem;
     font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    span {
+      padding: 0;
+      width: 7rem;
+    }
   }
 `;
 

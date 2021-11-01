@@ -142,11 +142,66 @@ export default styled.div`
         }
       }
     }
+  }
 
+  @media (max-width: 900px) {
+    aside {
+      padding: 0.75rem;
+      align-items: center;
+
+      p {
+        display: none;
+      }
+    }
+  }
+  @media (min-width: 768px) {
     ${({ theme }) =>
       theme.title === 'light' &&
       `.logout {
         filter: invert(100%) sepia(3%) saturate(1936%) hue-rotate(170deg) brightness(118%) contrast(87%);
     }`}
+  }
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    aside {
+      flex: 3;
+      flex-direction: column-reverse;
+      background-image: ${(props) =>
+        `linear-gradient(180deg, ${props.theme.secondary.bg_light},${props.theme.secondary.bg})`};
+      img {
+        max-width: 10rem;
+      }
+    }
+    main {
+      height: 70vh;
+    }
+
+    @media (max-height: 700px) {
+      aside {
+        display: none;
+      }
+    }
+  }
+  @media (max-height: 700px) {
+    aside {
+      padding: 0.75rem;
+      align-items: center;
+
+      p {
+        display: none;
+      }
+    }
+  }
+  @media (max-height: 600px) {
+    aside {
+      strong {
+        display: none;
+      }
+    }
+  }
+  @media (max-width: 400px) {
+    main {
+      padding: 0.75rem;
+    }
   }
 `;

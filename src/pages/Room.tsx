@@ -20,6 +20,8 @@ type RoomCodeType = {
 
 export default function Room() {
   const { id: roomCode } = useParams<RoomCodeType>();
+  const url = new URL(location.href);
+  const prettyCode = url.searchParams.get('pretty') ?? '';
   const authState = useSelector((state: RootState) => state.auth);
   const { user, isLoggedIn } = authState;
   const dispatch = useDispatch();
@@ -73,7 +75,7 @@ export default function Room() {
         <div className='content'>
           <img src={logoImg} alt='Live Chat Logo' onClick={redirectToHome} />
 
-          <RoomCode code={roomCode} />
+          <RoomCode code={prettyCode} />
         </div>
       </header>
       <main className='content'>
@@ -96,7 +98,7 @@ export default function Room() {
               <span>
                 <button onClick={() => dispatch(handleLoginUser(authState))}>
                   Login
-                </button>{' '}
+                </button>
                 to send a question
               </span>
             )}

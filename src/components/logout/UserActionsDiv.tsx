@@ -42,4 +42,10 @@ export const UserActions = styled.div`
       position: absolute;
     }
   }
+
+  @media (max-width: 768px) {
+    .username {
+      color: ${({ theme }) => theme.primary.color};
+    }
+  }
 `;

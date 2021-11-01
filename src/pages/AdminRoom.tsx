@@ -22,6 +22,8 @@ type RoomCodeType = {
 
 export default function AdminRoom() {
   const { id: roomCode } = useParams<RoomCodeType>();
+  const url = new URL(location.href);
+  const prettyCode = url.searchParams.get('pretty') ?? '';
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
@@ -118,10 +120,10 @@ export default function AdminRoom() {
   return (
     <RoomPageDiv>
       <header>
-        <div className='content'>
+        <div className='content admin-content'>
           <img src={logoImg} alt='Live Chat Logo' onClick={redirectToHome} />
           <div>
-            <RoomCode code={roomCode} />
+            <RoomCode code={prettyCode} />
             <Button isOutlined onClick={handleEndRoom}>
               Close Room
             </Button>
@@ -133,14 +135,16 @@ export default function AdminRoom() {
           className='room-title'
           style={{ alignItems: 'flex-start', display: 'flex' }}
         >
-          <div style={{ alignItems: 'flex-center', display: 'flex' }}>
+          <div className='title-count'>
             <h1>{title}</h1>
-            <span>
-              {questions.length} Question{questions.length === 1 ? '' : 's'}
-            </span>
-          </div>
-          <div style={{ marginLeft: 'auto' }}>
-            <Logout user={user} />
+            <div className='admin-info'>
+              <span>
+                {questions.length} Question{questions.length === 1 ? '' : 's'}
+              </span>
+              <div className='logout-admin'>
+                <Logout user={user} />
+              </div>
+            </div>
           </div>
         </div>
 

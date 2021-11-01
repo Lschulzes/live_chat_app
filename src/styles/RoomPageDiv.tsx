@@ -34,26 +34,44 @@ export const RoomPageDiv = styled.div`
   main {
     max-width: 50rem;
     margin: 0 auto;
+    padding: 1rem;
 
     .room-title {
       margin: 2rem 0 1.5rem;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
 
+      .title-count {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        .admin-info {
+          display: flex;
+          gap: 1rem;
+
+          .logout-admin {
+            transform: translateY(-0.35rem);
+          }
+        }
+      }
       h1 {
         font-family: 'Poppins', sans-serif;
         font-size: 1.5rem;
         color: ${(props) => props.theme.primary.color};
+        inline-size: 40rem;
+        overflow-wrap: break-word;
       }
 
       span {
-        margin-left: 1rem;
         background-color: ${(props) => props.theme.primary.item_color};
         border-radius: 999px;
         padding: 0.5rem 1rem;
         color: #fff;
         font-weight: 500;
         font-size: 0.85rem;
+        max-height: 2.2rem;
       }
 
       .username {
@@ -61,6 +79,7 @@ export const RoomPageDiv = styled.div`
           theme.title === 'light' ? theme.primary.bg : '#fff'} !important;
       }
     }
+
     form {
       textarea {
         width: 100%;
@@ -109,5 +128,39 @@ export const RoomPageDiv = styled.div`
       `.username {
       color: #333 !important;
     }`}
+  }
+
+  @media (max-width: 600px) {
+    header {
+      .content {
+        > img {
+          max-height: 2.3rem;
+        }
+      }
+      .admin-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+
+        > * {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          gap: 1rem;
+        }
+      }
+    }
+    .username {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .room-title {
+      h1 {
+        inline-size: 65vw !important;
+        overflow-wrap: break-word;
+      }
+    }
   }
 `;
