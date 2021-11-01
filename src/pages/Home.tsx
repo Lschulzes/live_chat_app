@@ -31,6 +31,7 @@ const Home: React.FC = () => {
   const authState = useSelector((state: RootState) => state.auth);
   const handleCreateRoom = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // If not logged in, remove from new room page and force log in
     if (!authState.isLoggedIn) {
       dispatch(UIActions.setError({ msg: 'Log In to create a room' }));
       history.push('/');
@@ -42,15 +43,17 @@ const Home: React.FC = () => {
       return dispatch(
         UIActions.setError({ msg: 'Maximum 40 characteres allowed' })
       );
+    // Generate a random code, and check if it doesnt exists in the db
     let prettyCode = Math.trunc(Math.random() * 100000000);
     let codeExists = true;
+    // If the code exists, loop incrementing until it doesn't
     while (codeExists) {
       codeExists = (await (await db.ref(`/room/${prettyCode}`)).get()).exists();
 
       if (codeExists) ++prettyCode;
     }
 
-    const dbRoomRef = await db
+    await db
       .ref('/room')
       .child(prettyCode + '')
       .set({
