@@ -42,21 +42,25 @@ const Home: React.FC = () => {
       return dispatch(
         UIActions.setError({ msg: 'Maximum 40 characteres allowed' })
       );
-    const prettyCode = Math.trunc(Math.random() * 100000000);
+    let prettyCode = Math.trunc(Math.random() * 100000000);
+    let codeExists = true;
+    while (codeExists) {
+      codeExists = (await (await db.ref(`/room/${prettyCode}`)).get()).exists();
 
-    const dbRoomRef = await db.ref('/room').push({
-      title: roomName,
-      authorId: authState.user.uid,
-      numericalCode: prettyCode,
-    });
+      if (codeExists) ++prettyCode;
+    }
 
-    await db
+    const dbRoomRef = await db
       .ref('/room')
       .child(prettyCode + '')
-      .set(dbRoomRef.key);
+      .set({
+        title: roomName,
+        authorId: authState.user.uid,
+      });
 
-    history.push(`/admin/room/${dbRoomRef.key}?pretty=${prettyCode}`);
+    history.push(`/admin/room/${prettyCode}`);
   };
+
   const handleNewRoom = async () => {
     try {
       const logged = await dispatch(handleLoginUser(authState));
@@ -73,8 +77,7 @@ const Home: React.FC = () => {
     const roomCode = roomCodeRef.current?.value;
     if (!roomCode?.trim().length) return;
 
-    const realCode = await (await db.ref(`/room/${roomCode}`).get()).val();
-    const dbRoom = await db.ref(`/room/${realCode}`).get();
+    const dbRoom = await db.ref(`/room/${roomCode}`).get();
     dispatch(UIActions.setIsLoading({ loading: false }));
     if (!dbRoom.exists()) {
       dispatch(UIActions.setError({ msg: 'No room with such code exists!' }));
@@ -84,10 +87,10 @@ const Home: React.FC = () => {
 
     if (room?.endedAt) return;
     if (room.authorId === authState.user.uid) {
-      history.push(`/admin/room/${realCode}?pretty=${roomCode}`);
+      history.push(`/admin/room/${roomCode}`);
       return;
     }
-    history.push(`/room/${realCode}?pretty=${roomCode}`);
+    history.push(`/room/${roomCode}`);
   };
 
   return (
