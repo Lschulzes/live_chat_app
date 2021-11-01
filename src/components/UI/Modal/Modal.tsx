@@ -42,8 +42,9 @@ const OverlayDiv = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
+  position: fixed;
   z-index: 10;
+  overflow: hidden;
 `;
 
 export default function Modal() {
@@ -62,7 +63,7 @@ export default function Modal() {
     <ReactModal
       isOpen={isOpen}
       onRequestClose={toggle}
-      preventScroll
+      preventScroll={true}
       className='_'
       overlayClassName='_'
       contentElement={(props, children) => (

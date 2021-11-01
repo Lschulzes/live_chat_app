@@ -38,14 +38,24 @@ const Home: React.FC = () => {
       return;
     }
     const roomName = roomNameRef.current!.value;
-    if (!roomName.trim().length) return;
+    if (!roomName.trim().length || roomName.trim().length > 40)
+      return dispatch(
+        UIActions.setError({ msg: 'Maximum 40 characteres allowed' })
+      );
+    const prettyCode = Math.trunc(Math.random() * 100000000);
 
     const dbRoomRef = await db.ref('/room').push({
       title: roomName,
       authorId: authState.user.uid,
+      numericalCode: prettyCode,
     });
 
-    history.push(`/admin/room/${dbRoomRef.key}`);
+    await db
+      .ref('/room')
+      .child(prettyCode + '')
+      .set(dbRoomRef.key);
+
+    history.push(`/admin/room/${dbRoomRef.key}?pretty=${prettyCode}`);
   };
   const handleNewRoom = async () => {
     try {
@@ -63,7 +73,8 @@ const Home: React.FC = () => {
     const roomCode = roomCodeRef.current?.value;
     if (!roomCode?.trim().length) return;
 
-    const dbRoom = await db.ref(`/room/${roomCode}`).get();
+    const realCode = await (await db.ref(`/room/${roomCode}`).get()).val();
+    const dbRoom = await db.ref(`/room/${realCode}`).get();
     dispatch(UIActions.setIsLoading({ loading: false }));
     if (!dbRoom.exists()) {
       dispatch(UIActions.setError({ msg: 'No room with such code exists!' }));
@@ -73,10 +84,10 @@ const Home: React.FC = () => {
 
     if (room?.endedAt) return;
     if (room.authorId === authState.user.uid) {
-      history.push(`/admin/room/${roomCode}`);
+      history.push(`/admin/room/${realCode}?pretty=${roomCode}`);
       return;
     }
-    history.push(`/room/${roomCode}`);
+    history.push(`/room/${realCode}?pretty=${roomCode}`);
   };
 
   return (
@@ -105,7 +116,12 @@ const Home: React.FC = () => {
           <Route path='/new-room'>
             <h2>Create a new room </h2>
             <form onSubmit={handleCreateRoom}>
-              <input type='text' placeholder='Room Name' ref={roomNameRef} />
+              <input
+                type='text'
+                placeholder='Room Name'
+                ref={roomNameRef}
+                max={80}
+              />
               <Button type='submit'>Create Room</Button>
             </form>
             <p>
