@@ -29,10 +29,11 @@ export const UserStyles = styled.div`
     max-width: 70rem;
     margin: 0 auto;
     display: flex;
-    aside {
-      padding: 1.5rem;
-      flex: 1;
 
+    aside {
+      padding: 1.5rem 0.5rem;
+      flex: 1;
+      min-width: 10rem;
       ul {
         list-style: none;
 
@@ -59,8 +60,8 @@ export const UserStyles = styled.div`
     }
 
     main {
-      flex: 4;
       padding: 1.5rem 2rem;
+      flex: 5;
 
       .general-settings {
         h2 {
@@ -68,6 +69,25 @@ export const UserStyles = styled.div`
           font-weight: lighter;
         }
       }
+
+      .favorite-rooms,
+      .user-rooms {
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        justify-items: stretch;
+      }
+    }
+  }
+
+  @media (max-width: 500px) {
+    #user-profile {
+      flex-direction: column;
+    }
+  }
+  @media (max-width: 380px) {
+    .username {
+      display: none;
     }
   }
 `;

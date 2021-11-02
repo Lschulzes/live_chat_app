@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import RoomCode from '../RoomCode/RoomCode';
 import { FavoriteRoomDiv } from './FavoriteRoomDiv';
 
 type FavRoomProps = {
@@ -7,10 +8,10 @@ type FavRoomProps = {
   title: string;
 };
 
-export default function FavoriteRoom({ code }: FavRoomProps) {
+export default function FavoriteRoom({ code, title }: FavRoomProps) {
   return (
     <FavoriteRoomDiv>
-      <h1>{code}</h1>
+      <RoomCode title={title} code={code} />
     </FavoriteRoomDiv>
   );
 }

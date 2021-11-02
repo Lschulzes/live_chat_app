@@ -6,6 +6,7 @@ export type User = {
   username: string;
   avatar: string;
   favorite_rooms: any;
+  my_rooms: any;
   premium_likes: number;
 };
 
@@ -21,6 +22,7 @@ const initialState: AuthStateType = {
     username: '',
     avatar: '',
     favorite_rooms: {},
+    my_rooms: {},
     premium_likes: 0,
   },
 };

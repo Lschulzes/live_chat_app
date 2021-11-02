@@ -69,13 +69,14 @@ export function Toast() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
+    let timerInside: NodeJS.Timeout | null = null;
     if (UIstate.isLoading) {
       notifyLoad();
       timer = setTimeout(() => {
         if (toastId.current) {
           dismiss();
           dispatch(UIActions.setIsLoading({ loading: false }));
-          setTimeout(() => {
+          timerInside = setTimeout(() => {
             dispatch(
               UIActions.setError({
                 msg: 'Loading exceeded time limit!',
@@ -100,6 +101,7 @@ export function Toast() {
     return () => {
       dismiss();
       if (timer) clearTimeout(timer);
+      if (timerInside) clearTimeout(timerInside);
     };
   }, [UIstate]);
 
