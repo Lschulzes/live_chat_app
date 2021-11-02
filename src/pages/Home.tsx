@@ -5,10 +5,10 @@ import React, { FormEvent, useContext, useRef } from 'react';
 import AuthDiv from '../styles/AuthDiv';
 import { ThemeContext } from 'styled-components';
 import ReactSwitch from 'react-switch';
-import Button from '../components/UI/Button';
+import Button from '../components/UI/Button/Button';
 import { Route, useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
-import Logout from '../components/logout/Logout';
+import Logout from '../components/logout/UserActions';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
@@ -156,3 +156,7 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
+// "$uid": {
+//   ".write":"auth.uid === $uid"
+// }

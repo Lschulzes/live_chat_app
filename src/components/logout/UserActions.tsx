@@ -1,14 +1,15 @@
 import logoutImg from '../../assets/images/logout.svg';
 import styled from 'styled-components';
 import ToggleTheme from '../toggleTheme/ToggleTheme';
-import { UserActions } from './UserActionsDiv';
+import { UserActionsDiv } from './UserActionsDiv';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store/index';
 import { handleLogout } from '../../store/slices/auth';
-
+import { useHistory } from 'react-router-dom';
+import { FaPlus } from 'react-icons/fa';
 const LogoutImg = styled.img`
   width: 2rem;
-  /* background: ${(props) => props.theme.primary.color}; */
+
   ${(props) =>
     props.theme.title === 'dark' &&
     'filter: invert(100%) sepia(3%) saturate(1936%) hue-rotate(170deg) brightness(118%) contrast(87%);'}
@@ -22,17 +23,26 @@ type LogoutProps = {
   };
 };
 
-export default function Logout(_: LogoutProps) {
+export default function UserActions(_: LogoutProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
+  const history = useHistory();
+
+  const redirect = (path: string): void => history.push(path);
+
   return (
-    <UserActions className='logout_btn'>
+    <UserActionsDiv className='logout_btn'>
       <img
         src={user.avatar}
         alt={'User Avatar'}
         className='pic'
         referrerPolicy='no-referrer'
+        style={{ background: '#000' }}
+        onClick={() => redirect(`/user/${user.uid}`)}
       />
+      <div className='plus'>
+        <FaPlus />
+      </div>
       <LogoutImg
         src={logoutImg}
         alt='logout'
@@ -41,6 +51,6 @@ export default function Logout(_: LogoutProps) {
       />
       <ToggleTheme />
       <span className='username'>{user.username}</span>
-    </UserActions>
+    </UserActionsDiv>
   );
 }

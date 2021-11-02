@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-export const UserActions = styled.div`
+export const UserActionsDiv = styled.div`
   padding: 0 1rem 1rem 0;
   display: flex;
   align-items: center;
@@ -8,6 +8,21 @@ export const UserActions = styled.div`
     border-radius: 45px;
     transition: all 0.4s;
     z-index: 2;
+    cursor: pointer;
+  }
+
+  .plus {
+    position: fixed;
+    width: 44px;
+    height: 44px;
+    border-radius: 45px;
+    font-size: larger;
+    z-index: 1;
+    background: ${({ theme }) => theme.primary.color};
+    color: ${({ theme }) => theme.primary.bg};
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .toggle-theme {
@@ -29,6 +44,9 @@ export const UserActions = styled.div`
   }
 
   &:hover {
+    .pic {
+      opacity: 0.2;
+    }
     .logout {
       margin-left: 1rem;
     }

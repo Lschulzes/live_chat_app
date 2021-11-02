@@ -1,15 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {
-  handleLoginUser,
-  handleLogoutUser,
-  handleUpdateUser,
-  loadUserAction,
-} from './actions';
+import { handleLogoutUser, handleUpdateUser, loadUserAction } from './actions';
 
 export type User = {
   uid: string;
   username: string;
   avatar: string;
+  favorite_rooms: {}[] | undefined;
+  premium_likes: number;
 };
 
 export type AuthStateType = {
@@ -23,6 +20,8 @@ const initialState: AuthStateType = {
     uid: '',
     username: '',
     avatar: '',
+    favorite_rooms: [],
+    premium_likes: 0,
   },
 };
 

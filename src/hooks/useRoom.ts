@@ -29,8 +29,6 @@ const useRoom = (roomCode: string): [QuestionType[], string] => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [title, setTitle] = useState<string>('');
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
-  const history = useHistory();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const roomRef = db.ref(`room/${roomCode}`);

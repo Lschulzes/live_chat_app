@@ -1,11 +1,11 @@
 import { FormEvent, useRef, useState } from 'react';
 import logoImg from '../assets/images/logo.svg';
-import Button from '../components/UI/Button';
+import Button from '../components/UI/Button/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
 import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
 import { db } from '../services/firebase';
-import Logout from '../components/logout/Logout';
+import Logout from '../components/logout/UserActions';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';

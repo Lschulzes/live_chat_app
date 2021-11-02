@@ -1,6 +1,6 @@
 import ReactModal from 'react-modal';
 import styled from 'styled-components';
-import Button from '../Button';
+import Button from '../Button/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { UIActions } from '../../../store/slices/UI/UISlice';
@@ -9,9 +9,12 @@ const ModalDiv = styled.div`
   ${(props) =>
     `background-image: linear-gradient(45deg,${props.theme.primary.bg} ,${props.theme.primary.bg_darker}) `};
   color: ${(props) => props.theme.primary.color};
-
+  margin: 0 1rem;
   max-width: 30rem;
   border-radius: 10px;
+  -webkit-animation: slide-in-top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    forwards;
+  animation: slide-in-top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 
   .modal-header {
     border-bottom: solid 1px #aaa;
@@ -32,6 +35,31 @@ const ModalDiv = styled.div`
     gap: 1rem;
     justify-content: flex-end;
   }
+
+  @-webkit-keyframes slide-in-top {
+    0% {
+      -webkit-transform: translateY(-1000px);
+      transform: translateY(-1000px);
+      opacity: 0;
+    }
+    100% {
+      -webkit-transform: translateY(0);
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in-top {
+    0% {
+      -webkit-transform: translateY(-1000px);
+      transform: translateY(-1000px);
+      opacity: 0;
+    }
+    100% {
+      -webkit-transform: translateY(0);
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 `;
 const OverlayDiv = styled.div`
   background: #000000aa;
@@ -45,6 +73,16 @@ const OverlayDiv = styled.div`
   position: fixed;
   z-index: 10;
   overflow: hidden;
+  animation: opacity 0.3s cubic-bezier(0.39, 0.575, 0.565, 1) forwards;
+
+  @keyframes opacity {
+    0% {
+      filter: opacity(0);
+    }
+    100% {
+      filter: opacity(1);
+    }
+  }
 `;
 
 export default function Modal() {
@@ -78,12 +116,12 @@ export default function Modal() {
         <h3>{title}</h3>
       </div>
       <div className='modal-body'>
-        <h1>{heading}</h1>
+        <h2>{heading}</h2>
         <p>{text}</p>
       </div>
       <div className='modal-footer'>
         <Button onClick={toggle} isOutlined>
-          Close
+          Cancel
         </Button>
         <Button onClick={dispatchAction}>{action}</Button>
       </div>
