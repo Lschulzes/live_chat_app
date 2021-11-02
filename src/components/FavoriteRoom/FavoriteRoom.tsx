@@ -4,6 +4,7 @@ import { FavoriteRoomDiv } from './FavoriteRoomDiv';
 type FavRoomProps = {
   children?: ReactNode;
   code: string;
+  title: string;
 };
 
 export default function FavoriteRoom({ code }: FavRoomProps) {

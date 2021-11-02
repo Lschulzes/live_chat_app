@@ -84,28 +84,26 @@ export const toggleFavoriteRoom: toggleRoom = (state, { payload }) => {
     const user: User = await (
       await db.ref(`user/${state.user.uid}`).get()
     ).val();
-    const dbRoom = await (await db.ref(`/room/${payload}`).get()).val();
+    const dbRoom: { title: string } = await (
+      await db.ref(`/room/${payload}`).get()
+    ).val();
     if (!dbRoom.title) return;
     const newRoom: any = {};
     newRoom[payload] = dbRoom.title;
     // if it has no favorite room, it's assumed that it will be added
-    if (!user?.favorite_rooms?.length) {
+    if (!user?.favorite_rooms) {
       await db
         .ref(`user/${state.user.uid}/favorite_rooms/${payload}`)
         .set(dbRoom.title);
-      user.favorite_rooms = [newRoom];
+      user.favorite_rooms = { newRoom };
       dispatch(AuthActions.handleUpdate(user));
       return;
     }
-    const roomIsFavorite = user.favorite_rooms.some(
-      (room) => Object.keys(room)[0] === payload
-    );
+    const roomIsFavorite = payload in user.favorite_rooms;
     // if room is favorite, remove from the user variable, else add to it
-    if (roomIsFavorite)
-      user.favorite_rooms = user.favorite_rooms.filter(
-        (room) => Object.keys(room)[0] !== payload
-      );
-    else user.favorite_rooms.push(newRoom);
+
+    if (roomIsFavorite) delete user.favorite_rooms[payload];
+    else user.favorite_rooms[payload] = dbRoom.title;
 
     console.log(user.favorite_rooms);
     // independent of the operation, overwrite the db
