@@ -5,7 +5,7 @@ export type User = {
   uid: string;
   username: string;
   avatar: string;
-  favorite_rooms: {}[] | undefined;
+  favorite_rooms: any;
   premium_likes: number;
 };
 
@@ -20,7 +20,7 @@ const initialState: AuthStateType = {
     uid: '',
     username: '',
     avatar: '',
-    favorite_rooms: [],
+    favorite_rooms: {},
     premium_likes: 0,
   },
 };

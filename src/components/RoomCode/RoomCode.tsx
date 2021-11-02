@@ -71,7 +71,7 @@ export default function RoomCode({ code: roomCode }: RoomCodeType) {
   };
 
   useEffect(() => {
-    setIsFavoriteRoom(favorite_rooms?.includes(roomCode) ?? false);
+    setIsFavoriteRoom(roomCode in user.favorite_rooms ?? false);
   }, [favorite_rooms]);
   return (
     <RoomCodeButton className='room-code'>

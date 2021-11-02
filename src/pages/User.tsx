@@ -41,13 +41,13 @@ export default function User() {
         <main>
           <Route path={`/user/${user.uid}/favorite`}>
             <div className='favorite-rooms'>
-              {/* {user.favorite_rooms ? (
-                user.favorite_rooms.map((room) => (
-                  <FavoriteRoom key={room} code={room} />
+              {user.favorite_rooms ? (
+                Object.entries((code: string, title: string) => (
+                  <FavoriteRoom key={code} code={code} title={title} />
                 ))
               ) : (
                 <h2>No favorite Rooms Yet</h2>
-              )} */}
+              )}
             </div>
           </Route>
           <Route path={`/user/${user.uid}/buy`}>
