@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import logoImg from '../assets/images/logo.svg';
-import Button from '../components/UI/Button';
+import Button from '../components/UI/Button/Button';
 import RoomCode from '../components/RoomCode/RoomCode';
 import deleteImg from '../assets/images/delete.svg';
 import checkImg from '../assets/images/check.svg';
@@ -8,7 +8,7 @@ import answerImg from '../assets/images/answer.svg';
 import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
 import { db } from '../services/firebase';
-import Logout from '../components/logout/Logout';
+import Logout from '../components/logout/UserActions';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -53,7 +53,7 @@ export default function AdminRoom() {
     dispatch(
       UIActions.setModal({
         heading: 'Are you sure to delete the question?',
-        title: `Room ${title}`,
+        title: `${title}`,
         action: 'Delete',
         text: '',
       })
@@ -89,7 +89,7 @@ export default function AdminRoom() {
     dispatch(
       UIActions.setModal({
         heading: 'Are you sure to terminate the room?',
-        title: `Room ${title}`,
+        title: `${title}`,
         action: 'Confirm',
         text: "This can't be undone!",
       })

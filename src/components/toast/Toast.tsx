@@ -62,11 +62,29 @@ export function Toast() {
         : toast.dark(<LoadToast>✅ {UIstate.success.msg}</LoadToast>);
   };
 
-  const dismiss = () => toast.dismiss(toastId.current);
+  const dismiss = () => {
+    toast.dismiss(toastId.current);
+    toastId.current = null;
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
-    if (UIstate.isLoading) notifyLoad();
+    if (UIstate.isLoading) {
+      notifyLoad();
+      timer = setTimeout(() => {
+        if (toastId.current) {
+          dismiss();
+          dispatch(UIActions.setIsLoading({ loading: false }));
+          setTimeout(() => {
+            dispatch(
+              UIActions.setError({
+                msg: 'Loading exceeded time limit!',
+              })
+            );
+          }, 1000);
+        }
+      }, 5000);
+    }
     if (UIstate.success.hasMsg) {
       notifySuccess();
       timer = setTimeout(() => {
