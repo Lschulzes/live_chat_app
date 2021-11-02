@@ -8,13 +8,13 @@ import ReactSwitch from 'react-switch';
 import Button from '../components/UI/Button/Button';
 import { Route, useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
-import Logout from '../components/logout/UserActions';
+import Logout from '../components/UserActions/UserActions';
 import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
-import { handleLoginUser } from '../store/slices/auth/actions';
+import { handleLoginUser, toggleMyRoom } from '../store/slices/auth/actions';
 import { UIActions } from '../store/slices/UI/UISlice';
 
 type RoomType = {
@@ -36,6 +36,17 @@ const Home: React.FC = () => {
       dispatch(UIActions.setError({ msg: 'Log In to create a room' }));
       history.push('/');
       handleNewRoom();
+      return;
+    }
+    if (
+      authState.user?.my_rooms &&
+      Object.entries(authState.user.my_rooms).length >= 5
+    ) {
+      dispatch(
+        UIActions.setError({
+          msg: 'Limit of rooms reached, go to profile to unlock more.',
+        })
+      );
       return;
     }
     const roomName = roomNameRef.current!.value;
@@ -60,6 +71,8 @@ const Home: React.FC = () => {
         title: roomName,
         authorId: authState.user.uid,
       });
+
+    dispatch(toggleMyRoom(authState, { payload: prettyCode + '', type: '' }));
 
     history.push(`/admin/room/${prettyCode}`);
   };

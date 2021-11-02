@@ -19,6 +19,7 @@ export const handleLoginUser = (state: AuthStateType) => {
       avatar: avatar ?? 'https://source.unsplash.com/user',
       uid,
       favorite_rooms: undefined,
+      my_rooms: undefined,
       premium_likes: 0,
     };
 
@@ -31,10 +32,12 @@ export const handleLoginUser = (state: AuthStateType) => {
         premium_likes: 0,
         uid: uid,
         favorite_rooms: [],
+        my_rooms: [],
       });
     } else {
       const user = await (await db.ref(`user/${uid}`).get()).val();
       user.favorite_rooms = user?.favorite_rooms ?? undefined;
+      user.my_rooms = user?.my_rooms ?? undefined;
       user.premium_likes = user?.premium_likes ?? undefined;
     }
 
@@ -68,6 +71,7 @@ export const handleLogoutUser: HandleUser = (state) => {
     uid: '',
     username: '',
     favorite_rooms: [],
+    my_rooms: [],
     premium_likes: 0,
   };
   persistOrGetLocalstorage('isLoggedIn', false, true);
@@ -95,7 +99,7 @@ export const toggleFavoriteRoom: toggleRoom = (state, { payload }) => {
       await db
         .ref(`user/${state.user.uid}/favorite_rooms/${payload}`)
         .set(dbRoom.title);
-      user.favorite_rooms = { newRoom };
+      user.favorite_rooms = newRoom;
       dispatch(AuthActions.handleUpdate(user));
       return;
     }
@@ -104,12 +108,44 @@ export const toggleFavoriteRoom: toggleRoom = (state, { payload }) => {
 
     if (roomIsFavorite) delete user.favorite_rooms[payload];
     else user.favorite_rooms[payload] = dbRoom.title;
-
-    console.log(user.favorite_rooms);
     // independent of the operation, overwrite the db
     await db
       .ref(`user/${state.user.uid}/favorite_rooms`)
       .set(user.favorite_rooms);
+    // and update the user locally
+    dispatch(AuthActions.handleUpdate(user));
+  };
+};
+
+export const toggleMyRoom: toggleRoom = (state, { payload }) => {
+  return async (dispatch: any) => {
+    if (!state.isLoggedIn || !state.user.uid?.length) return;
+    // Gets the user data from firebase
+    const user: User = await (
+      await db.ref(`user/${state.user.uid}`).get()
+    ).val();
+    const dbRoom: { title: string } = await (
+      await db.ref(`/room/${payload}`).get()
+    ).val();
+    if (!dbRoom.title) return;
+    const newRoom: any = {};
+    newRoom[payload] = dbRoom.title;
+    // if it has no  room, it's assumed that it will be added
+    if (!user?.my_rooms) {
+      await db
+        .ref(`user/${state.user.uid}/my_rooms/${payload}`)
+        .set(dbRoom.title);
+      user.my_rooms = newRoom;
+      dispatch(AuthActions.handleUpdate(user));
+      return;
+    }
+    const roomIsMine = payload in user.my_rooms;
+    // if room is in, remove from the user variable, else add to it
+
+    if (roomIsMine) delete user.my_rooms[payload];
+    else user.my_rooms[payload] = dbRoom.title;
+    // independent of the operation, overwrite the db
+    await db.ref(`user/${state.user.uid}/my_rooms`).set(user.my_rooms);
     // and update the user locally
     dispatch(AuthActions.handleUpdate(user));
   };

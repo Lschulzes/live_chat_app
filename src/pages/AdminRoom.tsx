@@ -8,13 +8,14 @@ import answerImg from '../assets/images/answer.svg';
 import { useHistory, useParams } from 'react-router';
 import { RoomPageDiv } from '../styles/RoomPageDiv';
 import { db } from '../services/firebase';
-import Logout from '../components/logout/UserActions';
+import Logout from '../components/UserActions/UserActions';
 import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { UIActions } from '../store/slices/UI/UISlice';
 import { UITypeActions } from '../store/helpers';
+import { toggleMyRoom } from '../store/slices/auth/actions';
 
 type RoomCodeType = {
   id: string;
@@ -26,6 +27,7 @@ export default function AdminRoom() {
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
   const trigger = useSelector((state: RootState) => state.UI.trigger);
+  const authState = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export default function AdminRoom() {
         await db.ref(`room/${roomCode}`).update({
           endedAt: new Date(),
         });
+        dispatch(toggleMyRoom(authState, { payload: roomCode, type: '' }));
         history.push('/');
       }
       dispatch(UIActions.cleanTrigger());
