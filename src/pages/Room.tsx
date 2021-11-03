@@ -10,9 +10,14 @@ import Question from '../components/question/Question';
 import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { handleLoginUser } from '../store/slices/auth/actions';
+import {
+  addOrSubtractActiveQuestionsInARoom,
+  handleLoginUser,
+} from '../store/slices/auth/actions';
 import { Link } from 'react-router-dom';
 import { UIActions } from '../store/slices/UI/UISlice';
+import { AuthActions } from '../store/slices/auth';
+import { handleSyncUserHelper } from '../store/helpers';
 
 type RoomCodeType = {
   id: string;
@@ -26,10 +31,10 @@ export default function Room() {
   const history = useHistory();
   const questionTextRef = useRef<HTMLTextAreaElement>(null);
   const [questions, title] = useRoom(roomCode);
+
   const handleCreateQuestion = async (e: FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn) return;
-
     const questionText = questionTextRef.current?.value;
     const questionLength = questionText?.trim().length;
     if (!questionLength) return;
@@ -40,16 +45,38 @@ export default function Room() {
       author: {
         name: user.username,
         avatar: user.avatar,
+        uid: user.uid,
       },
       isHighlighted: false,
       isAnswered: false,
     };
+
+    const limitRoomQuestions = await (
+      await db.ref(`room/${roomCode}/limit_questions`).get()
+    ).val();
+    const userSyncd = await handleSyncUserHelper(user.uid, dispatch);
+    if (
+      userSyncd?.active_questions &&
+      typeof userSyncd.active_questions[roomCode] !== 'undefined' &&
+      userSyncd.active_questions[roomCode] >= limitRoomQuestions
+    ) {
+      dispatch(UIActions.setError({ msg: 'Maximum active questions reached' }));
+      return;
+    }
     await db.ref(`room/${roomCode}/questions`).push(question);
     questionTextRef.current!.value = '';
     dispatch(UIActions.setSuccess({ msg: 'Question sent successfully!' }));
-    setTimeout(() => {
-      dispatch(UIActions.clearSuccess());
-    }, 3000);
+    dispatch(
+      addOrSubtractActiveQuestionsInARoom(authState, {
+        payload: {
+          add: true,
+          roomCode: roomCode,
+          uid: userSyncd.uid,
+          currentUser: true,
+        },
+        type: '',
+      })
+    );
   };
 
   const handleLikeQuestion = async (questionId: string, likeId: string) => {
@@ -69,7 +96,8 @@ export default function Room() {
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    if (roomCode in user.my_rooms) history.push(`/admin/room/${roomCode}`);
+    if (user?.my_rooms && roomCode in user.my_rooms)
+      history.push(`/admin/room/${roomCode}`);
   }, []);
 
   return (

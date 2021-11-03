@@ -1,21 +1,19 @@
 import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 import googleIconImg from '../assets/images/google-icon.svg';
-import React, { FormEvent, useContext, useRef } from 'react';
+import React, { FormEvent, useRef } from 'react';
 import AuthDiv from '../styles/AuthDiv';
-import { ThemeContext } from 'styled-components';
-import ReactSwitch from 'react-switch';
 import Button from '../components/UI/Button/Button';
 import { Route, useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
 import Logout from '../components/UserActions/UserActions';
-import useAuth from '../hooks/useAuth';
 import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store';
+import { RootState } from '../store';
 import { handleLoginUser, toggleMyRoom } from '../store/slices/auth/actions';
 import { UIActions } from '../store/slices/UI/UISlice';
+import { GlobalInitialState } from '../store/helpers';
 
 type RoomType = {
   authorId: string;
@@ -40,7 +38,8 @@ const Home: React.FC = () => {
     }
     if (
       authState.user?.my_rooms &&
-      Object.entries(authState.user.my_rooms).length >= 5
+      Object.entries(authState.user.my_rooms).length >=
+        authState.user.limit_rooms
     ) {
       dispatch(
         UIActions.setError({
@@ -70,6 +69,7 @@ const Home: React.FC = () => {
       .set({
         title: roomName,
         authorId: authState.user.uid,
+        limit_questions: GlobalInitialState.LIMIT_QUESTIONS_PER_USER,
       });
 
     dispatch(toggleMyRoom(authState, { payload: prettyCode + '', type: '' }));
