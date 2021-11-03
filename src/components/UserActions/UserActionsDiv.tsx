@@ -12,9 +12,9 @@ export const UserActionsDiv = styled.div`
   }
 
   .plus {
-    position: fixed;
-    width: 44px;
-    height: 44px;
+    position: absolute;
+    width: 45px;
+    height: 45px;
     border-radius: 45px;
     font-size: larger;
     z-index: 1;

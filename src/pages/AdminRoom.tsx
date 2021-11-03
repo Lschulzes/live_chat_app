@@ -15,7 +15,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { UIActions } from '../store/slices/UI/UISlice';
 import { UITypeActions } from '../store/helpers';
-import { toggleMyRoom } from '../store/slices/auth/actions';
+import {
+  addOrSubtractActiveQuestionsInARoom,
+  toggleMyRoom,
+} from '../store/slices/auth/actions';
 
 type RoomCodeType = {
   id: string;
@@ -26,6 +29,7 @@ export default function AdminRoom() {
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
+  const modal = useSelector((state: RootState) => state.UI.modal);
   const trigger = useSelector((state: RootState) => state.UI.trigger);
   const authState = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -35,9 +39,24 @@ export default function AdminRoom() {
     (async () => {
       if (!trigger.on) return;
       if (trigger.type === UITypeActions.DELETE_QUESTION) {
-        db.ref(
+        const questionRef = db.ref(
           `room/${roomCode}/questions/${trigger.data.questionId}`
-        ).remove();
+        );
+        const question: { isAnswered: boolean; author: { uid: string } } =
+          await (await questionRef.get()).val();
+        questionRef.remove();
+        if (question.isAnswered) return;
+        dispatch(
+          addOrSubtractActiveQuestionsInARoom(authState, {
+            payload: {
+              add: false,
+              roomCode: roomCode,
+              uid: question.author.uid,
+              currentUser: false,
+            },
+            type: '',
+          })
+        );
       }
       if (trigger.type === UITypeActions.CLOSE_ROOM) {
         await db.ref(`room/${roomCode}`).update({
@@ -70,12 +89,23 @@ export default function AdminRoom() {
     );
   };
   const handleCheckQuestionAsAnswered = async (questionId: string) => {
-    const question: { isAnswered: boolean } = (
+    const question: { isAnswered: boolean; author: { uid: string } } = (
       await db.ref(`room/${roomCode}/questions/${questionId}`).get()
     ).val();
     await db.ref(`room/${roomCode}/questions/${questionId}`).update({
       isAnswered: !question.isAnswered,
     });
+    dispatch(
+      addOrSubtractActiveQuestionsInARoom(authState, {
+        payload: {
+          add: question.isAnswered,
+          roomCode: roomCode,
+          uid: question.author.uid,
+          currentUser: false,
+        },
+        type: '',
+      })
+    );
   };
   const handleHighlightQuestion = async (questionId: string) => {
     const question: { isHighlighted: boolean } = (

@@ -8,6 +8,8 @@ export type User = {
   favorite_rooms: any;
   my_rooms: any;
   premium_likes: number;
+  limit_rooms: number;
+  active_questions: any;
 };
 
 export type AuthStateType = {
@@ -22,8 +24,10 @@ const initialState: AuthStateType = {
     username: '',
     avatar: '',
     favorite_rooms: {},
+    active_questions: {},
     my_rooms: {},
     premium_likes: 0,
+    limit_rooms: 5,
   },
 };
 

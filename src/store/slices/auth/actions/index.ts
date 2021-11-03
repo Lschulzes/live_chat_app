@@ -1,10 +1,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DispatchProp } from 'react-redux';
 import { AuthActions, AuthStateType, User } from '..';
-import { RootState } from '../../..';
 import firebase, { auth, db } from '../../../../services/firebase';
-import { persistOrGetLocalstorage } from '../../../helpers';
-import { UIActions } from '../../UI/UISlice';
+import { GlobalInitialState, persistOrGetLocalstorage } from '../../../helpers';
 
 export const handleLoginUser = (state: AuthStateType) => {
   return async (dispatch: any) => {
@@ -18,9 +15,11 @@ export const handleLoginUser = (state: AuthStateType) => {
       username,
       avatar: avatar ?? 'https://source.unsplash.com/user',
       uid,
-      favorite_rooms: undefined,
-      my_rooms: undefined,
-      premium_likes: 0,
+      favorite_rooms: [],
+      active_questions: [],
+      my_rooms: [],
+      premium_likes: GlobalInitialState.PREMIUM_LIKES,
+      limit_rooms: GlobalInitialState.LIMIT_ROOMS,
     };
 
     const userRef = db.ref(`user`);
@@ -29,16 +28,21 @@ export const handleLoginUser = (state: AuthStateType) => {
       await userRef.child(uid).set({
         username: username,
         avatar: avatar,
-        premium_likes: 0,
+        premium_likes: GlobalInitialState.PREMIUM_LIKES,
         uid: uid,
         favorite_rooms: [],
+        active_questions: [],
         my_rooms: [],
+        limit_rooms: GlobalInitialState.LIMIT_ROOMS,
       });
     } else {
       const user = await (await db.ref(`user/${uid}`).get()).val();
-      user.favorite_rooms = user?.favorite_rooms ?? undefined;
-      user.my_rooms = user?.my_rooms ?? undefined;
-      user.premium_likes = user?.premium_likes ?? undefined;
+      user.favorite_rooms = user?.favorite_rooms ?? [];
+      user.active_questions = user?.active_questions ?? [];
+      user.my_rooms = user?.my_rooms ?? [];
+      user.premium_likes =
+        user?.premium_likes ?? GlobalInitialState.PREMIUM_LIKES;
+      user.limit_rooms = user?.limit_rooms ?? GlobalInitialState.LIMIT_ROOMS;
     }
 
     dispatch(AuthActions.handleUpdate(user));
@@ -71,8 +75,10 @@ export const handleLogoutUser: HandleUser = (state) => {
     uid: '',
     username: '',
     favorite_rooms: [],
+    active_questions: [],
     my_rooms: [],
-    premium_likes: 0,
+    premium_likes: GlobalInitialState.PREMIUM_LIKES,
+    limit_rooms: GlobalInitialState.LIMIT_ROOMS,
   };
   persistOrGetLocalstorage('isLoggedIn', false, true);
   persistOrGetLocalstorage('user', { avatar: '', uid: '', username: '' }, true);
@@ -150,3 +156,50 @@ export const toggleMyRoom: toggleRoom = (state, { payload }) => {
     dispatch(AuthActions.handleUpdate(user));
   };
 };
+
+type activeQuestions = (
+  state: AuthStateType,
+  action: PayloadAction<{
+    add: boolean;
+    roomCode: string;
+    uid: string;
+    currentUser: boolean;
+  }>
+) => void;
+
+export const addOrSubtractActiveQuestionsInARoom: activeQuestions = (
+  state,
+  { payload }
+) => {
+  return async (dispatch: any) => {
+    if (!state.isLoggedIn) return;
+    const { add, roomCode, uid, currentUser } = payload;
+    const amountToAdd = add ? 1 : -1;
+    // Gets the user data from firebase
+    const user: User = await (await db.ref(`user/${uid}`).get()).val();
+    const roomQuestionMark: any = {};
+    roomQuestionMark[roomCode] = 1;
+
+    let activeQuestionsInRoom: number;
+    // if room is favorite, remove from the user variable, else add to it
+
+    if (user?.active_questions && roomCode in user.active_questions) {
+      activeQuestionsInRoom = user.active_questions[roomCode] + amountToAdd;
+    } else activeQuestionsInRoom = 1;
+    // independent of the operation, overwrite the db
+    if (activeQuestionsInRoom > 0) {
+      await db
+        .ref(`user/${uid}/active_questions/${roomCode}`)
+        .set(activeQuestionsInRoom);
+      user.active_questions = {};
+      user.active_questions[roomCode] = activeQuestionsInRoom;
+    } else {
+      await db.ref(`user/${uid}/active_questions/${roomCode}`).remove();
+      delete user.active_questions[roomCode];
+    }
+    // and update the user locally
+    if (currentUser) dispatch(AuthActions.handleUpdate(user));
+  };
+};
+
+type handleSyncUserType = (state: AuthStateType) => void;

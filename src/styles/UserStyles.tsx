@@ -76,6 +76,7 @@ export const UserStyles = styled.div`
         gap: 0.5rem;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         justify-items: stretch;
+        animation: fade 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       }
     }
   }
@@ -88,6 +89,15 @@ export const UserStyles = styled.div`
   @media (max-width: 380px) {
     .username {
       display: none;
+    }
+  }
+
+  @keyframes fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
     }
   }
 `;
