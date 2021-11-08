@@ -11,7 +11,7 @@ import { db } from '../services/firebase';
 import ToggleTheme from '../components/toggleTheme/ToggleTheme';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { handleLoginUser, toggleMyRoom } from '../store/slices/auth/actions';
+import { handleLoginUser, toggleRoom } from '../store/slices/auth/actions';
 import { UIActions } from '../store/slices/UI/UISlice';
 import { GlobalInitialState } from '../store/helpers';
 
@@ -72,7 +72,9 @@ const Home: React.FC = () => {
         limit_questions: GlobalInitialState.LIMIT_QUESTIONS_PER_USER,
       });
 
-    dispatch(toggleMyRoom(authState, { payload: prettyCode + '', type: '' }));
+    dispatch(
+      toggleRoom(authState, { payload: prettyCode + '', type: 'my_rooms' })
+    );
 
     history.push(`/admin/room/${prettyCode}`);
   };

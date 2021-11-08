@@ -50,6 +50,23 @@ export const handleLoginUser = (state: AuthStateType) => {
   };
 };
 
+export type SingleQuestion = {
+  content: string;
+  author: {
+    name: string;
+    avatar: string;
+    uid: string;
+  };
+  isHighlighted: boolean;
+  isAnswered: boolean;
+};
+
+export type SingleRoom = {
+  title: string;
+  authorId: string;
+  limit_questions: number;
+  questions?: { questionId: SingleQuestion }[];
+};
 type HandleUser = (state: AuthStateType) => void;
 type UpdateUser = (state: AuthStateType, action: PayloadAction<User>) => void;
 
@@ -85,73 +102,44 @@ export const handleLogoutUser: HandleUser = (state) => {
   return state;
 };
 
-type toggleRoom = (state: AuthStateType, roomId: PayloadAction<string>) => void;
+export const getUserFromDB = async (uid: string): Promise<User> => {
+  return await (await db.ref(`user/${uid}`).get()).val();
+};
 
-export const toggleFavoriteRoom: toggleRoom = (state, { payload }) => {
+export const getRoomFromDB = async (roomCode: string): Promise<SingleRoom> => {
+  return await (await db.ref(`/room/${roomCode}`).get()).val();
+};
+
+type ToggleRoom = (
+  state: AuthStateType,
+  roomId: { payload: string; type: string }
+) => void;
+
+export const toggleRoom: ToggleRoom = (state, { payload, type }) => {
   return async (dispatch: any) => {
     if (!state.isLoggedIn || !state.user.uid?.length) return;
     // Gets the user data from firebase
-    const user: User = await (
-      await db.ref(`user/${state.user.uid}`).get()
-    ).val();
-    const dbRoom: { title: string } = await (
-      await db.ref(`/room/${payload}`).get()
-    ).val();
-    if (!dbRoom.title) return;
+    const user: any = await getUserFromDB(state.user.uid);
+    const dbRoom = await getRoomFromDB(payload);
+    if (!dbRoom?.title) return;
     const newRoom: any = {};
     newRoom[payload] = dbRoom.title;
     // if it has no favorite room, it's assumed that it will be added
-    if (!user?.favorite_rooms) {
+    if (!user?.[type]) {
       await db
-        .ref(`user/${state.user.uid}/favorite_rooms/${payload}`)
+        .ref(`user/${state.user.uid}/${type}/${payload}`)
         .set(dbRoom.title);
-      user.favorite_rooms = newRoom;
+      user[type] = newRoom;
       dispatch(AuthActions.handleUpdate(user));
       return;
     }
-    const roomIsFavorite = payload in user.favorite_rooms;
+    const roomIsFavorite = payload in user[type];
     // if room is favorite, remove from the user variable, else add to it
 
-    if (roomIsFavorite) delete user.favorite_rooms[payload];
-    else user.favorite_rooms[payload] = dbRoom.title;
+    if (roomIsFavorite) delete user[type][payload];
+    else user[type][payload] = dbRoom.title;
     // independent of the operation, overwrite the db
-    await db
-      .ref(`user/${state.user.uid}/favorite_rooms`)
-      .set(user.favorite_rooms);
-    // and update the user locally
-    dispatch(AuthActions.handleUpdate(user));
-  };
-};
-
-export const toggleMyRoom: toggleRoom = (state, { payload }) => {
-  return async (dispatch: any) => {
-    if (!state.isLoggedIn || !state.user.uid?.length) return;
-    // Gets the user data from firebase
-    const user: User = await (
-      await db.ref(`user/${state.user.uid}`).get()
-    ).val();
-    const dbRoom: { title: string } = await (
-      await db.ref(`/room/${payload}`).get()
-    ).val();
-    if (!dbRoom.title) return;
-    const newRoom: any = {};
-    newRoom[payload] = dbRoom.title;
-    // if it has no  room, it's assumed that it will be added
-    if (!user?.my_rooms) {
-      await db
-        .ref(`user/${state.user.uid}/my_rooms/${payload}`)
-        .set(dbRoom.title);
-      user.my_rooms = newRoom;
-      dispatch(AuthActions.handleUpdate(user));
-      return;
-    }
-    const roomIsMine = payload in user.my_rooms;
-    // if room is in, remove from the user variable, else add to it
-
-    if (roomIsMine) delete user.my_rooms[payload];
-    else user.my_rooms[payload] = dbRoom.title;
-    // independent of the operation, overwrite the db
-    await db.ref(`user/${state.user.uid}/my_rooms`).set(user.my_rooms);
+    await db.ref(`user/${state.user.uid}/${type}`).set(user[type]);
     // and update the user locally
     dispatch(AuthActions.handleUpdate(user));
   };
