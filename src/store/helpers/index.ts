@@ -1,6 +1,12 @@
+import { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import { db } from '../../services/firebase';
 import { AuthActions, AuthStateType, User } from '../slices/auth';
+import {
+  addOrSubtractActiveQuestionsInARoom,
+  SingleQuestion,
+  toggleRoom,
+} from '../slices/auth/actions';
 
 export function persistOrGetLocalstorage<T>(
   key: string,
@@ -18,17 +24,6 @@ export function persistOrGetLocalstorage<T>(
   return defaultState;
 }
 
-export enum UITypeActions {
-  CLOSE_ROOM = 'CLOSE_ROOM',
-  DELETE_QUESTION = 'DELETE_QUESTION',
-}
-
-export enum GlobalInitialState {
-  LIMIT_ROOMS = 5,
-  PREMIUM_LIKES = 0,
-  LIMIT_QUESTIONS_PER_USER = 3,
-}
-
 type handleSyncUserType = (uid: string, dispatch: any) => Promise<User>;
 
 export const handleSyncUserHelper: handleSyncUserType = async (
@@ -39,4 +34,47 @@ export const handleSyncUserHelper: handleSyncUserType = async (
 
   dispatch(AuthActions.handleUpdate(user));
   return user;
+};
+
+type DeleteQuestionArgs = (
+  state: AuthStateType,
+  action: PayloadAction<{ roomId: string; questionId: string }>
+) => void;
+
+export const deleteQuestionFromDB: DeleteQuestionArgs = (state, action) => {
+  return async (dispatch: any) => {
+    const questionRef = db.ref(
+      `room/${action.payload.roomId}/questions/${action.payload.questionId}`
+    );
+    const question: SingleQuestion = await (await questionRef.get()).val();
+    questionRef.remove();
+    if (question.isAnswered) return;
+    dispatch(
+      addOrSubtractActiveQuestionsInARoom(state, {
+        payload: {
+          add: false,
+          roomCode: action.payload.roomId,
+          uid: question.author.uid,
+          currentUser: false,
+        },
+        type: '',
+      })
+    );
+  };
+};
+
+type CloseRoomArgs = (
+  state: AuthStateType,
+  action: PayloadAction<{ roomId: string }>
+) => void;
+
+export const CloseRoomFromDB: CloseRoomArgs = (state, action) => {
+  return async (dispatch: any) => {
+    await db.ref(`room/${action.payload.roomId}`).update({
+      endedAt: new Date(),
+    });
+    dispatch(
+      toggleRoom(state, { payload: action.payload.roomId, type: 'my_rooms' })
+    );
+  };
 };

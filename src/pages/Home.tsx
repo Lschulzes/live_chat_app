@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { handleLoginUser, toggleRoom } from '../store/slices/auth/actions';
 import { UIActions } from '../store/slices/UI/UISlice';
-import { GlobalInitialState } from '../store/helpers';
+import { GlobalInitialState } from '../store/helpers/enums';
 
 type RoomType = {
   authorId: string;

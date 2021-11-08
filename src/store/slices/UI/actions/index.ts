@@ -1,6 +1,5 @@
 import { PayloadAction, PayloadActionCreator } from '@reduxjs/toolkit';
-import { RootState } from '../../..';
-import { UITypeActions } from '../../../helpers';
+import { UITypeActions } from '../../../helpers/enums';
 import { ModalProps, UIStateType } from '../UISlice';
 
 export const setIsLoadingAction = (

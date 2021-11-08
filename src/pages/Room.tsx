@@ -14,13 +14,24 @@ import {
   addOrSubtractActiveQuestionsInARoom,
   handleLoginUser,
 } from '../store/slices/auth/actions';
-import { Link } from 'react-router-dom';
 import { UIActions } from '../store/slices/UI/UISlice';
-import { AuthActions } from '../store/slices/auth';
+import { AuthActions, User } from '../store/slices/auth';
 import { handleSyncUserHelper } from '../store/helpers';
 
 type RoomCodeType = {
   id: string;
+};
+
+const canCreateOneMoreQuestion = (
+  user: User,
+  roomId: string,
+  limitRoomQuestions: number
+): boolean => {
+  return user?.active_questions &&
+    typeof user.active_questions[roomId] !== 'undefined' &&
+    user.active_questions[roomId] >= limitRoomQuestions
+    ? true
+    : false;
 };
 
 export default function Room() {
@@ -55,11 +66,7 @@ export default function Room() {
       await db.ref(`room/${roomCode}/limit_questions`).get()
     ).val();
     const userSyncd = await handleSyncUserHelper(user.uid, dispatch);
-    if (
-      userSyncd?.active_questions &&
-      typeof userSyncd.active_questions[roomCode] !== 'undefined' &&
-      userSyncd.active_questions[roomCode] >= limitRoomQuestions
-    ) {
+    if (canCreateOneMoreQuestion(userSyncd, roomCode, limitRoomQuestions)) {
       dispatch(UIActions.setError({ msg: 'Maximum active questions reached' }));
       return;
     }

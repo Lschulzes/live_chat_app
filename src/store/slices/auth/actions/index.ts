@@ -1,7 +1,17 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { AuthActions, AuthStateType, User } from '..';
 import firebase, { auth, db } from '../../../../services/firebase';
-import { GlobalInitialState, persistOrGetLocalstorage } from '../../../helpers';
+import { persistOrGetLocalstorage } from '../../../helpers';
+import { GlobalInitialState } from '../../../helpers/enums';
+
+const setUser = (user: User): User => {
+  user.favorite_rooms = user?.favorite_rooms ?? [];
+  user.active_questions = user?.active_questions ?? [];
+  user.my_rooms = user?.my_rooms ?? [];
+  user.premium_likes = user?.premium_likes ?? GlobalInitialState.PREMIUM_LIKES;
+  user.limit_rooms = user?.limit_rooms ?? GlobalInitialState.LIMIT_ROOMS;
+  return user;
+};
 
 export const handleLoginUser = (state: AuthStateType) => {
   return async (dispatch: any) => {
@@ -11,38 +21,17 @@ export const handleLoginUser = (state: AuthStateType) => {
     if (!signInResult.user) return;
     const { displayName: username, photoURL: avatar, uid } = signInResult.user;
     if (!username?.length) return false;
-    const user = {
-      username,
-      avatar: avatar ?? 'https://source.unsplash.com/user',
-      uid,
-      favorite_rooms: [],
-      active_questions: [],
-      my_rooms: [],
-      premium_likes: GlobalInitialState.PREMIUM_LIKES,
-      limit_rooms: GlobalInitialState.LIMIT_ROOMS,
-    };
+    const user = defaultUser;
+    user.username = username;
+    user.avatar = avatar ?? 'https://source.unsplash.com/user';
+    user.uid = uid;
 
     const userRef = db.ref(`user`);
     const userSaved = await (await db.ref(`user/${uid}`).get()).exists();
-    if (!userSaved) {
-      await userRef.child(uid).set({
-        username: username,
-        avatar: avatar,
-        premium_likes: GlobalInitialState.PREMIUM_LIKES,
-        uid: uid,
-        favorite_rooms: [],
-        active_questions: [],
-        my_rooms: [],
-        limit_rooms: GlobalInitialState.LIMIT_ROOMS,
-      });
-    } else {
-      const user = await (await db.ref(`user/${uid}`).get()).val();
-      user.favorite_rooms = user?.favorite_rooms ?? [];
-      user.active_questions = user?.active_questions ?? [];
-      user.my_rooms = user?.my_rooms ?? [];
-      user.premium_likes =
-        user?.premium_likes ?? GlobalInitialState.PREMIUM_LIKES;
-      user.limit_rooms = user?.limit_rooms ?? GlobalInitialState.LIMIT_ROOMS;
+    if (!userSaved) await userRef.child(uid).set(user);
+    else {
+      const userFromDB = await (await db.ref(`user/${uid}`).get()).val();
+      const user = setUser(userFromDB);
     }
 
     dispatch(AuthActions.handleUpdate(user));
@@ -67,6 +56,18 @@ export type SingleRoom = {
   limit_questions: number;
   questions?: { questionId: SingleQuestion }[];
 };
+
+export const defaultUser = {
+  avatar: '',
+  uid: '',
+  username: '',
+  favorite_rooms: [],
+  active_questions: [],
+  my_rooms: [],
+  premium_likes: GlobalInitialState.PREMIUM_LIKES,
+  limit_rooms: GlobalInitialState.LIMIT_ROOMS,
+};
+
 type HandleUser = (state: AuthStateType) => void;
 type UpdateUser = (state: AuthStateType, action: PayloadAction<User>) => void;
 
@@ -84,30 +85,26 @@ export const loadUserAction = (state: AuthStateType) => {
   state.isLoggedIn = logged;
   return state;
 };
+
 export const handleLogoutUser: HandleUser = (state) => {
   firebase.auth().signOut();
   state.isLoggedIn = false;
-  state.user = {
-    avatar: '',
-    uid: '',
-    username: '',
-    favorite_rooms: [],
-    active_questions: [],
-    my_rooms: [],
-    premium_likes: GlobalInitialState.PREMIUM_LIKES,
-    limit_rooms: GlobalInitialState.LIMIT_ROOMS,
-  };
+  state.user = defaultUser;
   persistOrGetLocalstorage('isLoggedIn', false, true);
-  persistOrGetLocalstorage('user', { avatar: '', uid: '', username: '' }, true);
+  persistOrGetLocalstorage('user', defaultUser, true);
   return state;
 };
 
+export const getValueFromDB = async (path: string): Promise<any> => {
+  return await (await db.ref(path).get()).val();
+};
+
 export const getUserFromDB = async (uid: string): Promise<User> => {
-  return await (await db.ref(`user/${uid}`).get()).val();
+  return getValueFromDB(`user/${uid}`);
 };
 
 export const getRoomFromDB = async (roomCode: string): Promise<SingleRoom> => {
-  return await (await db.ref(`/room/${roomCode}`).get()).val();
+  return getValueFromDB(`/room/${roomCode}`);
 };
 
 type ToggleRoom = (
@@ -115,9 +112,13 @@ type ToggleRoom = (
   roomId: { payload: string; type: string }
 ) => void;
 
+const isUserLoggedIn = (state: AuthStateType): boolean => {
+  return !state.isLoggedIn || !state.user.uid?.length ? false : true;
+};
+
 export const toggleRoom: ToggleRoom = (state, { payload, type }) => {
   return async (dispatch: any) => {
-    if (!state.isLoggedIn || !state.user.uid?.length) return;
+    if (!isUserLoggedIn(state)) return;
     // Gets the user data from firebase
     const user: any = await getUserFromDB(state.user.uid);
     const dbRoom = await getRoomFromDB(payload);
@@ -155,6 +156,23 @@ type activeQuestions = (
   }>
 ) => void;
 
+const userHasActiveQuestionInRoom = (user: User, roomId: string): boolean => {
+  return user?.active_questions && roomId in user.active_questions
+    ? true
+    : false;
+};
+
+const setAmountOfActiveQuestionsInARoom = async (
+  user: User,
+  roomId: string,
+  activeQuestions: number
+): Promise<number> => {
+  await db
+    .ref(`user/${user.uid}/active_questions/${roomId}`)
+    .set(activeQuestions);
+  return activeQuestions;
+};
+
 export const addOrSubtractActiveQuestionsInARoom: activeQuestions = (
   state,
   { payload }
@@ -164,23 +182,29 @@ export const addOrSubtractActiveQuestionsInARoom: activeQuestions = (
     const { add, roomCode, uid, currentUser } = payload;
     const amountToAdd = add ? 1 : -1;
     // Gets the user data from firebase
-    const user: User = await (await db.ref(`user/${uid}`).get()).val();
+    const user: User = await getValueFromDB(`user/${uid}`);
     const roomQuestionMark: any = {};
     roomQuestionMark[roomCode] = 1;
 
     let activeQuestionsInRoom: number;
     // if room is favorite, remove from the user variable, else add to it
 
-    if (user?.active_questions && roomCode in user.active_questions) {
+    if (userHasActiveQuestionInRoom(user, roomCode)) {
       activeQuestionsInRoom = user.active_questions[roomCode] + amountToAdd;
-    } else activeQuestionsInRoom = 1;
+      user.active_questions = {};
+      user.active_questions[roomCode] = await setAmountOfActiveQuestionsInARoom(
+        user,
+        roomCode,
+        activeQuestionsInRoom
+      );
+    } else {
+      activeQuestionsInRoom = 1;
+    }
     // independent of the operation, overwrite the db
     if (activeQuestionsInRoom > 0) {
       await db
         .ref(`user/${uid}/active_questions/${roomCode}`)
         .set(activeQuestionsInRoom);
-      user.active_questions = {};
-      user.active_questions[roomCode] = activeQuestionsInRoom;
     } else {
       await db.ref(`user/${uid}/active_questions/${roomCode}`).remove();
       delete user.active_questions[roomCode];
@@ -189,5 +213,3 @@ export const addOrSubtractActiveQuestionsInARoom: activeQuestions = (
     if (currentUser) dispatch(AuthActions.handleUpdate(user));
   };
 };
-
-type handleSyncUserType = (state: AuthStateType) => void;
