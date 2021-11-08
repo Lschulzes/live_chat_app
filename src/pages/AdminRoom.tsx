@@ -17,7 +17,7 @@ import { UIActions } from '../store/slices/UI/UISlice';
 import { UITypeActions } from '../store/helpers';
 import {
   addOrSubtractActiveQuestionsInARoom,
-  toggleMyRoom,
+  toggleRoom,
 } from '../store/slices/auth/actions';
 
 type RoomCodeType = {
@@ -62,7 +62,9 @@ export default function AdminRoom() {
         await db.ref(`room/${roomCode}`).update({
           endedAt: new Date(),
         });
-        dispatch(toggleMyRoom(authState, { payload: roomCode, type: '' }));
+        dispatch(
+          toggleRoom(authState, { payload: roomCode, type: 'my_rooms' })
+        );
         history.push('/');
       }
       dispatch(UIActions.cleanTrigger());

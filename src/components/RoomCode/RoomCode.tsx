@@ -6,7 +6,7 @@ import { BsBookmarkStarFill, BsBookmarkStar } from 'react-icons/bs';
 import { UIActions } from '../../store/slices/UI/UISlice';
 import { RootState } from '../../store';
 import { useEffect, useState } from 'react';
-import { toggleFavoriteRoom } from '../../store/slices/auth/actions';
+import { toggleRoom } from '../../store/slices/auth/actions';
 import { RoomCodeButton } from './RoomCodeButton';
 
 type RoomCodeType = {
@@ -43,7 +43,10 @@ export default function RoomCode({ code: roomCode, title }: RoomCodeType) {
         <div
           onClick={() =>
             dispatch(
-              toggleFavoriteRoom(authState, { payload: roomCode, type: '' })
+              toggleRoom(authState, {
+                payload: roomCode,
+                type: 'favorite_rooms',
+              })
             )
           }
         >
