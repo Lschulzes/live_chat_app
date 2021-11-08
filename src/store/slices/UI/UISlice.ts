@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { ReactNode } from 'react';
-import { UITypeActions } from '../../helpers';
+import { UITypeActions } from '../../helpers/enums';
 import {
   cleanTriggerAction,
   clearErrorAction,
@@ -59,14 +59,14 @@ export const UISlice = createSlice({
   initialState,
   reducers: {
     setIsLoading: setIsLoadingAction,
-    clearError: clearErrorAction,
     setError: setErrorAction,
+    clearError: clearErrorAction,
     setSuccess: setSuccessAction,
     clearSuccess: clearSuccessAction,
-    toggleModal: toggleModalAction,
     setModal: setModalAction,
-    cleanTrigger: cleanTriggerAction,
+    toggleModal: toggleModalAction,
     setTrigger: setTriggerAction,
+    cleanTrigger: cleanTriggerAction,
   },
 });
 

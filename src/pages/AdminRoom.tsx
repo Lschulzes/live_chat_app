@@ -14,11 +14,13 @@ import useRoom from '../hooks/useRoom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { UIActions } from '../store/slices/UI/UISlice';
-import { UITypeActions } from '../store/helpers';
 import {
   addOrSubtractActiveQuestionsInARoom,
+  SingleQuestion,
   toggleRoom,
 } from '../store/slices/auth/actions';
+import { UITypeActions } from '../store/helpers/enums';
+import { CloseRoomFromDB, deleteQuestionFromDB } from '../store/helpers';
 
 type RoomCodeType = {
   id: string;
@@ -29,7 +31,6 @@ export default function AdminRoom() {
   const { user, isLoggedIn } = useSelector((state: RootState) => state.auth);
   const [questions, title] = useRoom(roomCode);
   const history = useHistory();
-  const modal = useSelector((state: RootState) => state.UI.modal);
   const trigger = useSelector((state: RootState) => state.UI.trigger);
   const authState = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -39,31 +40,19 @@ export default function AdminRoom() {
     (async () => {
       if (!trigger.on) return;
       if (trigger.type === UITypeActions.DELETE_QUESTION) {
-        const questionRef = db.ref(
-          `room/${roomCode}/questions/${trigger.data.questionId}`
-        );
-        const question: { isAnswered: boolean; author: { uid: string } } =
-          await (await questionRef.get()).val();
-        questionRef.remove();
-        if (question.isAnswered) return;
         dispatch(
-          addOrSubtractActiveQuestionsInARoom(authState, {
-            payload: {
-              add: false,
-              roomCode: roomCode,
-              uid: question.author.uid,
-              currentUser: false,
-            },
+          deleteQuestionFromDB(authState, {
+            payload: { questionId: trigger.data.questionId, roomId: roomCode },
             type: '',
           })
         );
       }
       if (trigger.type === UITypeActions.CLOSE_ROOM) {
-        await db.ref(`room/${roomCode}`).update({
-          endedAt: new Date(),
-        });
         dispatch(
-          toggleRoom(authState, { payload: roomCode, type: 'my_rooms' })
+          CloseRoomFromDB(authState, {
+            payload: { roomId: roomCode },
+            type: '',
+          })
         );
         history.push('/');
       }
@@ -90,6 +79,7 @@ export default function AdminRoom() {
       })
     );
   };
+
   const handleCheckQuestionAsAnswered = async (questionId: string) => {
     const question: { isAnswered: boolean; author: { uid: string } } = (
       await db.ref(`room/${roomCode}/questions/${questionId}`).get()
@@ -109,6 +99,7 @@ export default function AdminRoom() {
       })
     );
   };
+
   const handleHighlightQuestion = async (questionId: string) => {
     const question: { isHighlighted: boolean } = (
       await db.ref(`room/${roomCode}/questions/${questionId}`).get()
