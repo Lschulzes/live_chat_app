@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 export const RoomCodeButton = styled.button`
   height: 2.5rem;
   border-radius: 8px;
@@ -9,7 +9,7 @@ export const RoomCodeButton = styled.button`
   background: ${({ theme }) => theme.primary.bg_light};
   color: ${({ theme }) => theme.primary.color};
 
-  ${(props) => 'border: 1px solid ' + props.theme.primary.item_color + ';'}
+  ${(props) => "border: 1px solid " + props.theme.primary.item_color + ";"}
   cursor: pointer;
 
   div {
