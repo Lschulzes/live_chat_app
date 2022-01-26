@@ -1,8 +1,8 @@
-import { PayloadAction } from '@reduxjs/toolkit';
-import { AuthActions, AuthStateType, User } from '..';
-import firebase, { auth, db } from '../../../../services/firebase';
-import { persistOrGetLocalstorage } from '../../../helpers';
-import { GlobalInitialState } from '../../../helpers/enums';
+import { PayloadAction } from "@reduxjs/toolkit";
+import { AuthActions, AuthStateType, User } from "..";
+import firebase, { auth, db } from "../../../../services/firebase";
+import { getLocalstorage, persistLocalstorage } from "../../../helpers";
+import { GlobalInitialState } from "../../../helpers/enums";
 
 const setUser = (user: User): User => {
   user.favorite_rooms = user?.favorite_rooms ?? [];
@@ -23,7 +23,7 @@ export const handleLoginUser = (state: AuthStateType) => {
     if (!username?.length) return false;
     const user = defaultUser;
     user.username = username;
-    user.avatar = avatar ?? 'https://source.unsplash.com/user';
+    user.avatar = avatar ?? "https://source.unsplash.com/user";
     user.uid = uid;
 
     const userRef = db.ref(`user`);
@@ -58,9 +58,9 @@ export type SingleRoom = {
 };
 
 export const defaultUser = {
-  avatar: '',
-  uid: '',
-  username: '',
+  avatar: "",
+  uid: "",
+  username: "",
   favorite_rooms: [],
   active_questions: [],
   my_rooms: [],
@@ -72,16 +72,16 @@ type HandleUser = (state: AuthStateType) => void;
 type UpdateUser = (state: AuthStateType, action: PayloadAction<User>) => void;
 
 export const handleUpdateUser: UpdateUser = (state, action) => {
-  persistOrGetLocalstorage('user', action.payload, true);
+  persistLocalstorage("user", action.payload);
   state.user = action.payload;
   state.isLoggedIn = true;
   return state;
 };
 
 export const loadUserAction = (state: AuthStateType) => {
-  state.user = persistOrGetLocalstorage('user', state.user);
+  state.user = getLocalstorage("user", state.user);
   const logged = state.user?.uid?.length ? true : false;
-  persistOrGetLocalstorage('isLoggedIn', logged, true);
+  persistLocalstorage("isLoggedIn", logged);
   state.isLoggedIn = logged;
   return state;
 };
@@ -90,8 +90,8 @@ export const handleLogoutUser: HandleUser = (state) => {
   firebase.auth().signOut();
   state.isLoggedIn = false;
   state.user = defaultUser;
-  persistOrGetLocalstorage('isLoggedIn', false, true);
-  persistOrGetLocalstorage('user', defaultUser, true);
+  persistLocalstorage("isLoggedIn", false);
+  persistLocalstorage("user", defaultUser);
   return state;
 };
 

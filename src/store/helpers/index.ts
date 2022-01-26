@@ -1,14 +1,14 @@
-import { PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '..';
-import { db } from '../../services/firebase';
-import { AuthActions, AuthStateType, User } from '../slices/auth';
+import { PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "..";
+import { db } from "../../services/firebase";
+import { AuthActions, AuthStateType, User } from "../slices/auth";
 import {
   addOrSubtractActiveQuestionsInARoom,
   SingleQuestion,
   toggleRoom,
-} from '../slices/auth/actions';
+} from "../slices/auth/actions";
 
-export function persistOrGetLocalstorage<T>(
+function persistOrGetLocalstorage<T>(
   key: string,
   defaultState: any,
   overwrite: boolean = false
@@ -23,6 +23,12 @@ export function persistOrGetLocalstorage<T>(
 
   return defaultState;
 }
+
+export const persistLocalstorage = <T>(key: string, defaultState: T): T =>
+  persistOrGetLocalstorage<T>(key, defaultState, true);
+
+export const getLocalstorage = <T>(key: string, defaultState: any): T =>
+  persistOrGetLocalstorage<T>(key, defaultState);
 
 type handleSyncUserType = (uid: string, dispatch: any) => Promise<User>;
 
@@ -57,7 +63,7 @@ export const deleteQuestionFromDB: DeleteQuestionArgs = (state, action) => {
           uid: question.author.uid,
           currentUser: false,
         },
-        type: '',
+        type: "",
       })
     );
   };
@@ -74,7 +80,7 @@ export const CloseRoomFromDB: CloseRoomArgs = (state, action) => {
       endedAt: new Date(),
     });
     dispatch(
-      toggleRoom(state, { payload: action.payload.roomId, type: 'my_rooms' })
+      toggleRoom(state, { payload: action.payload.roomId, type: "my_rooms" })
     );
   };
 };
