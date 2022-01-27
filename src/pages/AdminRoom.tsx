@@ -42,7 +42,7 @@ export default function AdminRoom() {
     (async () => {
       if (!trigger.on) return;
       if (trigger.type === UITypeActions.DELETE_QUESTION) {
-        dispatch(
+        await dispatch(
           deleteQuestionFromDB(authState, {
             payload: { questionId: trigger.data.questionId, roomId: roomCode },
             type: "",
@@ -50,7 +50,7 @@ export default function AdminRoom() {
         );
       }
       if (trigger.type === UITypeActions.CLOSE_ROOM) {
-        dispatch(
+        await dispatch(
           CloseRoomFromDB(authState, {
             payload: { roomId: roomCode },
             type: "",

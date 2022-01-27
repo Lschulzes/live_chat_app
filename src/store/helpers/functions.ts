@@ -79,7 +79,7 @@ export const CloseRoomFromDB: CloseRoomArgs = (state, action) => {
     await db.ref(`room/${action.payload.roomId}`).update({
       endedAt: new Date(),
     });
-    dispatch(
+    await dispatch(
       toggleRoom(state, { payload: action.payload.roomId, type: "my_rooms" })
     );
   };
@@ -90,4 +90,17 @@ export const hasUserReachedRoomsLimit = (user: User): boolean => {
     Object.entries(user.my_rooms).length >= user.limit_rooms
     ? true
     : false;
+};
+
+export const generatePrettyCode = async (): Promise<string> => {
+  let prettyCode = Math.trunc(Math.random() * 100000000);
+  let codeExists = true;
+  // If the code exists, loop incrementing until it doesn't
+  while (codeExists) {
+    const code = await db.ref(`/room/${prettyCode}`).get();
+    codeExists = await code.exists();
+
+    if (codeExists) ++prettyCode;
+  }
+  return prettyCode + "";
 };

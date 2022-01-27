@@ -14,7 +14,10 @@ import { RootState } from "../store";
 import { handleLoginUser, toggleRoom } from "../store/slices/auth/actions";
 import { UIActions } from "../store/slices/UI/UISlice";
 import { GlobalInitialState } from "../store/helpers/enums";
-import { hasUserReachedRoomsLimit } from "../store/helpers/functions";
+import {
+  generatePrettyCode,
+  hasUserReachedRoomsLimit,
+} from "../store/helpers/functions";
 
 type RoomType = {
   authorId: string;
@@ -51,29 +54,17 @@ const Home: React.FC = () => {
         UIActions.setError({ msg: "Maximum 40 characteres allowed" })
       );
     // Generate a random code, and check if it doesnt exists in the db
-    let prettyCode = Math.trunc(Math.random() * 100000000);
-    let codeExists = true;
-    // If the code exists, loop incrementing until it doesn't
-    while (codeExists) {
-      codeExists = (await (await db.ref(`/room/${prettyCode}`)).get()).exists();
+    const roomCode = await generatePrettyCode();
 
-      if (codeExists) ++prettyCode;
-    }
+    await db.ref("/room").child(roomCode).set({
+      title: roomName,
+      authorId: authState.user.uid,
+      limit_questions: GlobalInitialState.LIMIT_QUESTIONS_PER_USER,
+    });
 
-    await db
-      .ref("/room")
-      .child(prettyCode + "")
-      .set({
-        title: roomName,
-        authorId: authState.user.uid,
-        limit_questions: GlobalInitialState.LIMIT_QUESTIONS_PER_USER,
-      });
+    dispatch(toggleRoom(authState, { payload: roomCode, type: "my_rooms" }));
 
-    dispatch(
-      toggleRoom(authState, { payload: prettyCode + "", type: "my_rooms" })
-    );
-
-    history.push(`/admin/room/${prettyCode}`);
+    history.push(`/admin/room/${roomCode}`);
   };
 
   const handleNewRoom = async () => {
