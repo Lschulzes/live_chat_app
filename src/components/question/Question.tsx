@@ -1,6 +1,6 @@
-import { ReactChildren, ReactNode } from 'react';
-import styled from 'styled-components';
-import cx from 'classnames';
+import { ReactNode } from "react";
+import styled from "styled-components";
+import cx from "classnames";
 
 const QuestionLi = styled.li`
   background-color: ${(props) => props.theme.primary.bg_light};
@@ -112,11 +112,11 @@ export default function Question({
     >
       <p>{content}</p>
       <footer>
-        <div className='user-info'>
+        <div className="user-info">
           <img
             src={author.avatar}
             alt={author.name}
-            referrerPolicy='no-referrer'
+            referrerPolicy="no-referrer"
           />
           <span>{author.name}</span>
         </div>

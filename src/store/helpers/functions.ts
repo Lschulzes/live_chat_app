@@ -84,3 +84,10 @@ export const CloseRoomFromDB: CloseRoomArgs = (state, action) => {
     );
   };
 };
+
+export const hasUserReachedRoomsLimit = (user: User): boolean => {
+  return user?.my_rooms &&
+    Object.entries(user.my_rooms).length >= user.limit_rooms
+    ? true
+    : false;
+};
