@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { db } from '../services/firebase';
-import { RootState } from '../store';
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { db } from "../services/firebase";
+import { RootState } from "../store";
 
 type QuestionType = {
   author: {
@@ -25,12 +25,12 @@ type RoomData = {
 
 const useRoom = (roomCode: string): [QuestionType[], string] => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
-  const [title, setTitle] = useState<string>('');
+  const [title, setTitle] = useState<string>("");
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const roomRef = db.ref(`room/${roomCode}`);
-    roomRef.on('value', (room) => {
+    roomRef.on("value", (room) => {
       const { questions, title } = room.val() as RoomData;
       let questionsArray: any[] = [];
       if (questions) {
@@ -56,12 +56,12 @@ const useRoom = (roomCode: string): [QuestionType[], string] => {
         return (areEqual && -1) || isBBigger;
       });
 
-      setQuestions(questionsArray as QuestionType[]);
+      setQuestions(questionsArray);
 
       setTitle(title);
 
       return () => {
-        roomRef.off('value');
+        roomRef.off("value");
       };
     });
   }, [roomCode, user?.uid]);
