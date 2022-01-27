@@ -1,7 +1,10 @@
 import { DefaultTheme } from "styled-components";
 import { ThemeStateType } from "..";
 import { darkTheme, lightTheme } from "../../../../styles/themes/Themes";
-import { persistLocalstorage, getLocalstorage } from "../../../helpers";
+import {
+  persistLocalstorage,
+  getLocalstorage,
+} from "../../../helpers/functions";
 
 function getDifferentTheme(themeTitle: string): DefaultTheme {
   const newTheme = themeTitle === "light" ? darkTheme : lightTheme;

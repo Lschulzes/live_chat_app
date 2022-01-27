@@ -1,10 +1,10 @@
+import { AuthStateType, SingleQuestion, User } from "./types";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { db } from "../../services/firebase";
-import { AuthActions, AuthStateType, User } from "../slices/auth";
+import { AuthActions } from "../slices/auth";
 import {
   addOrSubtractActiveQuestionsInARoom,
-  SingleQuestion,
   toggleRoom,
 } from "../slices/auth/actions";
 

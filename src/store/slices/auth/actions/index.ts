@@ -1,7 +1,11 @@
+import { AuthStateType, SingleRoom, User } from "../../../helpers/types";
 import { PayloadAction } from "@reduxjs/toolkit";
-import { AuthActions, AuthStateType, User } from "..";
+import { AuthActions } from "..";
 import firebase, { auth, db } from "../../../../services/firebase";
-import { getLocalstorage, persistLocalstorage } from "../../../helpers";
+import {
+  getLocalstorage,
+  persistLocalstorage,
+} from "../../../helpers/functions";
 import { GlobalInitialState } from "../../../helpers/enums";
 
 const setUser = (user: User): User => {
@@ -39,25 +43,7 @@ export const handleLoginUser = (state: AuthStateType) => {
   };
 };
 
-export type SingleQuestion = {
-  content: string;
-  author: {
-    name: string;
-    avatar: string;
-    uid: string;
-  };
-  isHighlighted: boolean;
-  isAnswered: boolean;
-};
-
-export type SingleRoom = {
-  title: string;
-  authorId: string;
-  limit_questions: number;
-  questions?: { questionId: SingleQuestion }[];
-};
-
-export const defaultUser = {
+export const defaultUser: User = {
   avatar: "",
   uid: "",
   username: "",

@@ -1,6 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { ReactNode } from 'react';
-import { UITypeActions } from '../../helpers/enums';
+import { createSlice } from "@reduxjs/toolkit";
+import { ReactNode } from "react";
+import { UITypeActions } from "../../helpers/enums";
+import { UIStateType } from "../../helpers/types";
 import {
   cleanTriggerAction,
   clearErrorAction,
@@ -11,24 +12,7 @@ import {
   setSuccessAction,
   setTriggerAction,
   toggleModalAction,
-} from './actions';
-
-export type ModalProps = {
-  children?: ReactNode;
-  title: string;
-  heading: string;
-  text?: string;
-  action?: string;
-};
-
-export type UIStateType = {
-  isModalOpen: boolean;
-  isLoading: boolean;
-  error: { hasError: boolean; msg: string | null };
-  success: { hasMsg: boolean; msg: string | null };
-  modal: ModalProps;
-  trigger: { on: boolean; type: UITypeActions | null; data: any };
-};
+} from "./actions";
 
 const initialState: UIStateType = {
   error: {
@@ -42,10 +26,10 @@ const initialState: UIStateType = {
   },
   isModalOpen: false,
   modal: {
-    heading: '',
-    title: '',
-    text: '',
-    action: '',
+    heading: "",
+    title: "",
+    text: "",
+    action: "",
   },
   trigger: {
     on: false,
@@ -55,7 +39,7 @@ const initialState: UIStateType = {
 };
 
 export const UISlice = createSlice({
-  name: 'theme',
+  name: "theme",
   initialState,
   reducers: {
     setIsLoading: setIsLoadingAction,

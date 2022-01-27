@@ -1,28 +1,13 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { handleLogoutUser, handleUpdateUser, loadUserAction } from './actions';
-
-export type User = {
-  uid: string;
-  username: string;
-  avatar: string;
-  favorite_rooms: any;
-  my_rooms: any;
-  premium_likes: number;
-  limit_rooms: number;
-  active_questions: any;
-};
-
-export type AuthStateType = {
-  isLoggedIn: boolean;
-  user: User;
-};
+import { createSlice } from "@reduxjs/toolkit";
+import { AuthStateType } from "../../helpers/types";
+import { handleLogoutUser, handleUpdateUser, loadUserAction } from "./actions";
 
 const initialState: AuthStateType = {
   isLoggedIn: true,
   user: {
-    uid: '',
-    username: '',
-    avatar: '',
+    uid: "",
+    username: "",
+    avatar: "",
     favorite_rooms: {},
     active_questions: {},
     my_rooms: {},
@@ -32,7 +17,7 @@ const initialState: AuthStateType = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     handleLogout: handleLogoutUser,
