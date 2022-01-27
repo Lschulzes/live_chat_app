@@ -36,7 +36,7 @@ const canCreateOneMoreQuestion = (
 
 export default function Room() {
   const { id: roomCode } = useParams<RoomCodeType>();
-  const authState = useSelector((state: RootState) => state.auth);
+  const { auth: authState } = useSelector((state: RootState) => state);
   const { user, isLoggedIn } = authState;
   const dispatch = useDispatch();
   const history = useHistory();
@@ -101,10 +101,14 @@ export default function Room() {
 
   const redirectToHome = () => history.push("/");
 
-  useEffect(() => {
+  const redirectIfAdmin = (): void => {
     if (!isLoggedIn) return;
     if (user?.my_rooms && roomCode in user.my_rooms)
       history.push(`/admin/room/${roomCode}`);
+  };
+
+  useEffect(() => {
+    redirectIfAdmin();
   }, []);
 
   return (
