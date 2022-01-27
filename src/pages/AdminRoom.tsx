@@ -1,26 +1,28 @@
-import { useEffect } from 'react';
-import logoImg from '../assets/images/logo.svg';
-import Button from '../components/UI/Button/Button';
-import RoomCode from '../components/RoomCode/RoomCode';
-import deleteImg from '../assets/images/delete.svg';
-import checkImg from '../assets/images/check.svg';
-import answerImg from '../assets/images/answer.svg';
-import { useHistory, useParams } from 'react-router';
-import { RoomPageDiv } from '../styles/RoomPageDiv';
-import { db } from '../services/firebase';
-import Logout from '../components/UserActions/UserActions';
-import Question from '../components/question/Question';
-import useRoom from '../hooks/useRoom';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { UIActions } from '../store/slices/UI/UISlice';
+import { useEffect } from "react";
+import logoImg from "../assets/images/logo.svg";
+import Button from "../components/UI/Button/Button";
+import RoomCode from "../components/RoomCode/RoomCode";
+import deleteImg from "../assets/images/delete.svg";
+import checkImg from "../assets/images/check.svg";
+import answerImg from "../assets/images/answer.svg";
+import { useHistory, useParams } from "react-router";
+import { RoomPageDiv } from "../styles/RoomPageDiv";
+import { db } from "../services/firebase";
+import Logout from "../components/UserActions/UserActions";
+import Question from "../components/question/Question";
+import useRoom from "../hooks/useRoom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { UIActions } from "../store/slices/UI/UISlice";
 import {
   addOrSubtractActiveQuestionsInARoom,
-  SingleQuestion,
   toggleRoom,
-} from '../store/slices/auth/actions';
-import { UITypeActions } from '../store/helpers/enums';
-import { CloseRoomFromDB, deleteQuestionFromDB } from '../store/helpers';
+} from "../store/slices/auth/actions";
+import { UITypeActions } from "../store/helpers/enums";
+import {
+  CloseRoomFromDB,
+  deleteQuestionFromDB,
+} from "../store/helpers/functions";
 
 type RoomCodeType = {
   id: string;
@@ -43,7 +45,7 @@ export default function AdminRoom() {
         dispatch(
           deleteQuestionFromDB(authState, {
             payload: { questionId: trigger.data.questionId, roomId: roomCode },
-            type: '',
+            type: "",
           })
         );
       }
@@ -51,10 +53,10 @@ export default function AdminRoom() {
         dispatch(
           CloseRoomFromDB(authState, {
             payload: { roomId: roomCode },
-            type: '',
+            type: "",
           })
         );
-        history.push('/');
+        history.push("/");
       }
       dispatch(UIActions.cleanTrigger());
     })();
@@ -65,10 +67,10 @@ export default function AdminRoom() {
     dispatch(UIActions.toggleModal());
     dispatch(
       UIActions.setModal({
-        heading: 'Are you sure to delete the question?',
+        heading: "Are you sure to delete the question?",
         title: `${title}`,
-        action: 'Delete',
-        text: '',
+        action: "Delete",
+        text: "",
       })
     );
     dispatch(
@@ -95,7 +97,7 @@ export default function AdminRoom() {
           uid: question.author.uid,
           currentUser: false,
         },
-        type: '',
+        type: "",
       })
     );
   };
@@ -114,9 +116,9 @@ export default function AdminRoom() {
     dispatch(UIActions.toggleModal());
     dispatch(
       UIActions.setModal({
-        heading: 'Are you sure to terminate the room?',
+        heading: "Are you sure to terminate the room?",
         title: `${title}`,
-        action: 'Confirm',
+        action: "Confirm",
         text: "This can't be undone!",
       })
     );
@@ -132,7 +134,7 @@ export default function AdminRoom() {
   useEffect(() => {
     let controller = new AbortController();
     (async () => {
-      if (!isLoggedIn) return history.push('/');
+      if (!isLoggedIn) return history.push("/");
       const room: any = await (await db.ref(`/room/${roomCode}`).get()).val();
       if (room.authorId === user.uid || !user.uid) return;
       history.push(`/`);
@@ -140,12 +142,12 @@ export default function AdminRoom() {
 
     return () => controller?.abort();
   }, [isLoggedIn]);
-  const redirectToHome = () => history.push('/');
+  const redirectToHome = () => history.push("/");
   return (
     <RoomPageDiv>
       <header>
-        <div className='content admin-content'>
-          <img src={logoImg} alt='Live Chat Logo' onClick={redirectToHome} />
+        <div className="content admin-content">
+          <img src={logoImg} alt="Live Chat Logo" onClick={redirectToHome} />
           <div>
             <RoomCode code={roomCode} />
             <Button isOutlined onClick={handleEndRoom}>
@@ -154,25 +156,25 @@ export default function AdminRoom() {
           </div>
         </div>
       </header>
-      <main className='content'>
+      <main className="content">
         <div
-          className='room-title'
-          style={{ alignItems: 'flex-start', display: 'flex' }}
+          className="room-title"
+          style={{ alignItems: "flex-start", display: "flex" }}
         >
-          <div className='title-count'>
+          <div className="title-count">
             <h1>{title}</h1>
-            <div className='admin-info'>
+            <div className="admin-info">
               <span>
-                {questions.length} Question{questions.length === 1 ? '' : 's'}
+                {questions.length} Question{questions.length === 1 ? "" : "s"}
               </span>
-              <div className='logout-admin'>
+              <div className="logout-admin">
                 <Logout user={user} />
               </div>
             </div>
           </div>
         </div>
 
-        <ul className='question-list'>
+        <ul className="question-list">
           {questions.map((question) => (
             <Question
               key={question.questionId}
@@ -182,24 +184,24 @@ export default function AdminRoom() {
               isHighlighted={question.isHighlighted}
             >
               <button
-                type='button'
+                type="button"
                 onClick={() =>
                   handleCheckQuestionAsAnswered(question.questionId)
                 }
               >
-                <img src={checkImg} alt='Check question as answered' />
+                <img src={checkImg} alt="Check question as answered" />
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => handleHighlightQuestion(question.questionId)}
               >
-                <img src={answerImg} alt='Highlights question' />
+                <img src={answerImg} alt="Highlights question" />
               </button>
               <button
-                type='button'
+                type="button"
                 onClick={() => handleDeleteQuestion(question.questionId)}
               >
-                <img src={deleteImg} alt='delete question' />
+                <img src={deleteImg} alt="delete question" />
               </button>
             </Question>
           ))}
