@@ -3,5 +3,6 @@ node_modules
 dist
 dist-ssr
 *.local
-vite.config.ts
+# If running your own fork, uncomment the following line, so no one uses your keys
+# vite.config.ts
 database.rules.json
